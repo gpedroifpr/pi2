@@ -1,0 +1,648 @@
+/* Reset básico e Estilos Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4; /* Fundo geral da página mais claro */
+    color: #333;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block; /* Remove espaço extra abaixo de imagens inline */
+}
+
+.screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    width: 100%;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* --- Estilos do Menu Lateral (Off-canvas) --- */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    max-width: 80%;
+    height: 100%;
+    background-color: #f8f9fa;
+    padding: 20px;
+    padding-top: 60px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1001;
+    transition: left 0.3s ease-in-out;
+    overflow-y: auto;
+}
+
+.side-menu.open {
+    left: 0;
+}
+
+.close-side-menu-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2.2em;
+    color: #555;
+    cursor: pointer;
+    line-height: 1;
+}
+.close-side-menu-btn:hover {
+    color: #000;
+}
+
+.side-menu-link {
+    display: block;
+    padding: 12px 15px;
+    color: #333;
+    font-size: 1.1em;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+.side-menu-link:last-of-type {
+    border-bottom: none;
+}
+.side-menu-link:hover {
+    background-color: #e9ecef;
+    color: #000;
+}
+.side-menu-link.active-nav-link {
+    background-color: #007bff; /* Azul para destacar link ativo */
+    color: #fff;
+    font-weight: bold;
+}
+.side-menu hr {
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 15px 0;
+}
+
+
+/* --- Overlay para o Menu --- */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.menu-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+
+/* --- Estilos da Página de Login e Cadastro --- */
+#login-screen,
+#register-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.6); /* Overlay um pouco mais escuro */
+    z-index: 999;
+}
+
+.login-container {
+    background-color: #ffffff;
+    width: 450px;
+    max-width: 90%;
+    padding: 35px 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.login-container-content {
+    width: 100%;
+    text-align: center;
+}
+.login-container h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30px;
+}
+.login-container .form-group {
+    width: 100%; /* Ocupar toda a largura do container */
+    margin: 0 auto 20px auto;
+    text-align: left;
+}
+.login-container label {
+    display: block;
+    font-size: 1em; /* Tamanho de label mais padrão */
+    color: #555; /* Cor mais suave para label */
+    margin-bottom: 8px;
+    /* padding-left: 10px; */
+}
+.login-container input[type="text"],
+.login-container input[type="email"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 12px 18px; /* Padding ajustado */
+    border: 1px solid #ccc; /* Borda sutil */
+    border-radius: 5px; /* Border radius menor, mais moderno */
+    background-color: #f9f9f9;
+    font-size: 1em;
+    outline: none;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+    transition: border-color 0.2s ease;
+}
+.login-container input[type="text"]:focus,
+.login-container input[type="email"]:focus,
+.login-container input[type="password"]:focus {
+    border-color: #007bff; /* Destaque no foco */
+}
+
+.login-container .btn-login { /* Estilo unificado para botões de formulário */
+    background-color: #007bff; /* Azul primário */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    width: 100%; /* Botão com largura total */
+    margin-top: 15px; /* Espaço reduzido */
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+}
+.login-container .btn-login:hover {
+    background-color: #0056b3; /* Azul mais escuro no hover */
+}
+.login-container .btn-register { /* Se houver diferença para o botão de registrar */
+    background-color: #28a745; /* Verde para cadastro */
+}
+.login-container .btn-register:hover {
+    background-color: #218838;
+}
+
+.login-container .signup-link,
+.login-container .login-link {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #555;
+}
+.login-container .signup-link a,
+.login-container .login-link a {
+    color: #007bff;
+    font-weight: bold;
+}
+.close-login-btn,
+.close-register-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.8em; /* Tamanho do X um pouco menor */
+    color: #888; /* Cor mais suave */
+    cursor: pointer;
+    line-height: 1;
+}
+.close-login-btn:hover,
+.close-register-btn:hover {
+    color: #333;
+}
+
+/* --- Estilos da Aplicação Principal --- */
+.site-header {
+    background-color: #ffffff; /* Header branco para um look mais clean */
+    padding: 0 25px; /* Padding vertical removido, altura controlada por height */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08); /* Sombra mais suave */
+    height: 70px;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+}
+
+.menu-toggle .hamburger-icon {
+    width: 24px; /* Ajuste no tamanho do ícone */
+    height: 2px; /* Ajuste na espessura */
+    background-color: #555; /* Cor do ícone */
+    display: block;
+    position: relative;
+    border-radius: 2px;
+}
+.menu-toggle .hamburger-icon::before,
+.menu-toggle .hamburger-icon::after {
+    content: '';
+    width: 24px;
+    height: 2px;
+    background-color: #555;
+    display: block;
+    position: absolute;
+    left: 0;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+.menu-toggle .hamburger-icon::before {
+    top: -7px;
+}
+.menu-toggle .hamburger-icon::after {
+    bottom: -7px;
+}
+
+.search-bar {
+    flex-grow: 1;
+    max-width: 450px;
+    margin: 0 20px;
+}
+
+.search-bar input[type="search"] {
+    width: 100%;
+    padding: 10px 20px; /* Padding aumentado */
+    border: 1px solid #ddd; /* Borda mais sutil */
+    border-radius: 25px;
+    font-size: 0.9em;
+    background-color: #f5f5f5; /* Fundo da barra de pesquisa */
+}
+.header-right {
+    display: flex;
+    align-items: center;
+}
+.site-logo-header {
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+}
+.site-logo-header svg {
+    width: 38px; /* Logo um pouco maior */
+    height: 38px;
+}
+.auth-links a {
+    color: #555; /* Cor dos links de auth */
+    margin-left: 18px; /* Espaçamento maior */
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.auth-links a:hover {
+    color: #007bff; /* Destaque no hover */
+    text-decoration: none;
+}
+
+/* --- Estilos do Conteúdo Principal --- */
+.site-main-content {
+    flex-grow: 1;
+    width: 100%;
+    padding-bottom: 40px;
+}
+
+.page-content {
+    display: none;
+    padding: 35px 25px;
+    background-color: transparent; /* Tornar transparente para o body.background-color aparecer */
+    max-width: 1300px;
+    margin: 0 auto; /* Removido margin-top/bottom, já tem no site-main-content */
+}
+.page-content.active-page {
+    display: block;
+}
+
+.page-title {
+    font-size: 2.2em; /* Título um pouco menor */
+    color: #333;
+    margin-top: 20px; /* Espaço acima do título */
+    margin-bottom: 30px;
+    font-weight: 600; /* Peso da fonte */
+    text-align: center;
+    padding-bottom: 10px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+/* ESTILOS DO CARD DE PRODUTO */
+.product-card {
+    background-color: #fff;
+    border: 1px solid #e9e9e9; /* Borda mais suave */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06); /* Sombra mais sutil */
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.product-image-container {
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+    background-color: #f0f0f0; /* Cor de fundo caso a imagem não carregue */
+}
+
+.product-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Garante que a imagem cubra o espaço sem distorcer */
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image-container img {
+    transform: scale(1.05);
+}
+
+.product-info {
+    padding: 15px;
+    text-align: left;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-name {
+    font-size: 1.05em; /* Nome do produto um pouco menor */
+    color: #333;
+    margin-bottom: 8px;
+    font-weight: 600;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.4em; /* Ajuste conforme o tamanho da fonte e line-height */
+    line-height: 1.2em;
+}
+
+.product-price {
+    font-size: 1.15em; /* Preço um pouco maior */
+    color: #007bff;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.add-to-cart-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em; /* Botão um pouco menor */
+    font-weight: 500;
+    text-align: center;
+    transition: background-color 0.2s ease;
+    margin-top: auto;
+    text-transform: uppercase; /* Caixa alta para o botão */
+    letter-spacing: 0.5px;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #218838;
+}
+
+
+.about-text {
+    font-size: 1.05em;
+    color: #444;
+    max-width: 800px; /* Aumentar um pouco a largura máxima */
+    line-height: 1.8; /* Espaçamento entre linhas maior */
+    margin: 0 auto; /* Centralizar o texto sobre */
+    padding: 20px;
+    background-color: #fff; /* Fundo branco para a seção sobre */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.site-footer {
+    background-color: #333; /* Footer mais escuro */
+    color: #ccc; /* Texto mais claro no footer */
+    text-align: center;
+    padding: 0;
+    font-size: 0.9em;
+    height: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #444; /* Borda sutil no topo do footer */
+}
+
+/* Media queries para responsividade */
+@media (max-width: 768px) {
+    .site-header {
+        padding: 0 15px;
+    }
+    .search-bar {
+        margin: 0 10px;
+        max-width: 250px;
+    }
+    .header-right .auth-links {
+        display: none;
+    }
+    .page-title {
+        font-size: 1.8em;
+    }
+    .content-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Ajuste para cards */
+        gap: 20px;
+    }
+    .product-image-container {
+        height: 240px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-bar {
+        display: none;
+    }
+    .page-title {
+        font-size: 1.6em;
+        margin-bottom: 20px;
+    }
+    .page-content {
+        padding: 25px 15px;
+    }
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 colunas em telas pequenas */
+        gap: 15px;
+    }
+    .product-image-container {
+        height: 180px;
+    }
+     .product-name {
+        font-size: 0.9em;
+        min-height: 2.2em; /* Para 2 linhas */
+    }
+    .product-price {
+        font-size: 1em;
+    }
+    .add-to-cart-btn {
+        font-size: 0.85em;
+        padding: 8px 10px;
+    }
+
+    .login-container {
+        width: 95%;
+        padding: 25px 20px;
+    }
+    .login-container h1 {
+        font-size: 2em;
+    }
+    .side-menu {
+        width: 250px;
+        left: -250px;
+    }
+    /* --- Estilos da Página Minha Conta --- */
+.user-details-container {
+    background-color: #fff;
+    padding: 30px 35px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    max-width: 700px;
+    margin: 20px auto; /* Centraliza e dá um espaço vertical */
+    text-align: left;
+}
+
+.user-details-container h2 {
+    font-size: 1.9em;
+    color: #333;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    font-weight: 600;
+}
+
+.user-details-container p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 18px;
+    line-height: 1.7;
+}
+
+.user-details-container p strong {
+    color: #333;
+    margin-right: 8px;
+    font-weight: 500;
+    min-width: 80px; /* Alinhamento visual básico */
+    display: inline-block;
+}
+
+#user-name-display,
+#user-email-display {
+    font-weight: normal;
+    color: #007bff; /* Destaca a informação */
+}
+
+#btn-logout-my-account:hover {
+    background-color: #c82333 !important; /* Mais escuro para o hover do botão de sair */
+}
+/* --- Estilos do Painel de Administração --- */
+.admin-form-container, .product-list-container {
+    background-color: #fff;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin: 20px auto;
+    max-width: 800px;
+}
+.admin-form-container h2, .product-list-container h2 {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+#product-form .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+#product-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+#product-form input, #product-form textarea, #product-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+#product-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+#product-list-table th, #product-list-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+#product-list-table th {
+    background-color: #f8f9fa;
+}
+.btn-edit, .btn-delete {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+}
+.btn-edit { background-color: #007bff; }
+.btn-delete { background-color: #dc3545; }
+}

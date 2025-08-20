@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PENICIUS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Overlay para o menu lateral -->
+    <div class="menu-overlay"></div>
+
+    <!-- Menu Lateral (Off-canvas) -->
+    <nav class="side-menu" id="sideMenu">
+        <button class="close-side-menu-btn" aria-label="Fechar Menu Lateral">×</button>
+        <a href="#modelos" class="side-menu-link nav-link" data-target="modelos">Modelos</a>
+        <a href="#masculino" class="side-menu-link nav-link" data-target="masculino">Roupas Masculinas</a>
+        <a href="#infantil" class="side-menu-link nav-link" data-target="infantil">Roupas Infantis</a>
+        <a href="#sobre" class="side-menu-link nav-link" data-target="sobre">Sobre Nós</a>
+        <hr>
+        <a href="#" class="side-menu-link go-to-login">Minha Conta / Login</a>
+        <a href="#" class="side-menu-link go-to-register">Cadastrar</a>
+    </nav>
+
+    <!-- Tela de Login (não ativa inicialmente) -->
+    <div id="login-screen" class="screen">
+        <div class="login-container">
+            <div class="login-container-content">
+                <h1>Login</h1>
+                <form id="login-form-actual">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-senha">Senha:</label>
+                        <input type="password" id="login-senha" name="senha" required>
+                    </div>
+                    <button type="submit" class="btn-login">Entrar</button>
+                </form>
+                <p class="signup-link">
+                    Não tem uma conta? <a href="#" class="go-to-register">Cadastre-se</a>
+                </p>
+                 <button class="close-login-btn" aria-label="Fechar Login">×</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Cadastro (não ativa inicialmente) -->
+    <div id="register-screen" class="screen">
+        <div class="login-container register-container">
+            <div class="login-container-content">
+                <h1>Cadastre-se</h1>
+                <form id="register-form-actual">
+                    <div class="form-group">
+                        <label for="register-nome">Nome completo:</label>
+                        <input type="text" id="register-nome" name="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email:</label>
+                        <input type="email" id="register-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-senha">Senha:</label>
+                        <input type="password" id="register-senha" name="senha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirmar-senha">Confirmar Senha:</label>
+                        <input type="password" id="register-confirmar-senha" name="confirmar_senha" required>
+                    </div>
+                    <button type="submit" class="btn-login btn-register">Cadastrar</button>
+                </form>
+                <p class="login-link">
+                    Já tem uma conta? <a href="#" class="go-to-login-from-register">Faça Login</a>
+                </p>
+                 <button class="close-register-btn" aria-label="Fechar Cadastro">×</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Conteúdo Principal da Aplicação (ativo inicialmente) -->
+    <div id="main-app" class="screen active">
+        <header class="site-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+                    <span class="hamburger-icon"></span>
+                </button>
+            </div>
+            <div class="search-bar">
+                <input type="search" placeholder="Pesquisar...">
+            </div>
+            <div class="header-right">
+                <a href="#" class="site-logo-header go-to-login" title="Ir para Login">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="#A0B8D0"/>
+                        <path d="M50 15 L85 50 L50 85 L15 50 Z" fill="#D0E0F0"/>
+                        <path d="M50 25 L75 50 L50 75 L25 50 Z" fill="#FFFFFF"/>
+                    </svg>
+                </a>
+                <div class="auth-links">
+                    <a href="#" class="go-to-register">Cadastrar</a>
+                    <a href="#" class="go-to-login">Entrar</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="site-main-content">
+            <section id="modelos" class="page-content active-page">
+                <h1 class="page-title">Modelos em Destaque</h1>
+                <div class="content-grid" id="grid-modelos">
+                    <!-- O JavaScript irá preencher esta área -->
+                </div>
+            </section>
+
+            <section id="masculino" class="page-content">
+                <h1 class="page-title">Roupas Masculinas</h1>
+                <div class="content-grid" id="grid-masculino">
+                    <!-- O JavaScript irá preencher esta área -->
+                </div>
+            </section>
+
+            <section id="infantil" class="page-content">
+                <h1 class="page-title">Roupas Infantis</h1>
+                <div class="content-grid" id="grid-infantil">
+                    <!-- O JavaScript irá preencher esta área -->
+                </div>
+            </section>
+
+            <section id="sobre" class="page-content">
+                <h1 class="page-title">Sobre Nós</h1>
+                <p class="about-text">
+                    Bem-vindo à PENICIUS! Somos apaixonados por moda e dedicados a oferecer as últimas tendências com qualidade e estilo para todos os públicos.
+                    Nossa missão é proporcionar uma experiência de compra única, com peças que expressam individualidade e conforto.
+                    Desde o início, buscamos inovar e trazer o melhor do mundo da moda para você, seja para o dia a dia, ocasiões especiais ou para os pequenos.
+                    Explore nossas coleções e descubra o look perfeito que combina com você!
+                </p>
+            </section>
+
+                        </section> <!-- Fim da seção sobre -->
+                              <!-- =============== PAINEL DE ADMINISTRAÇÃO =============== -->
+        <!--      Esta seção só será visível para o usuário admin      -->
+        <section id="admin-panel" class="page-content" style="display: none;">
+            <h1 class="page-title">Gerenciar Produtos</h1>
+
+            <!-- Formulário para Adicionar/Editar Produtos -->
+            <div class="admin-form-container">
+                <h2 id="form-title">Adicionar Novo Produto</h2>
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    <div class="form-group">
+                        <label for="product-nome">Nome do Produto</label>
+                        <input type="text" id="product-nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-descricao">Descrição</label>
+                        <textarea id="product-descricao" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-preco">Preço (ex: 199.90)</label>
+                        <input type="number" step="0.01" id="product-preco" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-categoria">Categoria</label>
+                        <select id="product-categoria" required>
+                            <option value="modelos">Modelos Destaque</option>
+                            <option value="masculino">Masculino</option>
+                            <option value="infantil">Infantil</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-imagem">URL da Imagem (ex: /images/modelo/novo.jpg)</label>
+                        <input type="text" id="product-imagem">
+                    </div>
+                    <button type="submit" class="btn-login">Salvar Produto</button>
+                    <button type="button" id="cancel-edit-btn" class="btn-login" style="display:none; background-color: #6c757d;">Cancelar Edição</button>
+                </form>
+            </div>
+
+            <!-- Lista de Produtos Cadastrados -->
+            <div class="product-list-container">
+                <h2>Produtos Existentes</h2>
+                <table id="product-list-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-list-body">
+                        <!-- Produtos serão inseridos aqui pelo JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+<!-- ... resto do código ... -->
+
+            <section id="minha-conta" class="page-content">
+                <h1 class="page-title">Minha Conta</h1>
+                <div class="user-details-container">
+                    <h2>Detalhes do Usuário</h2>
+                    <p><strong>Nome:</strong> <span id="user-name-display">Carregando...</span></p>
+                    <p><strong>Email:</strong> <span id="user-email-display">Carregando...</span></p>
+                    <!-- Você pode adicionar mais informações do usuário aqui no futuro -->
+                    <button id="btn-logout-my-account" class="btn-login" style="background-color: #dc3545; margin-top: 30px; width: auto; padding: 10px 20px;">Sair da Conta</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <p>© 2024 PENICIUS. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
