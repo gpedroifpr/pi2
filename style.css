@@ -547,6 +547,7 @@ img {
         width: 250px;
         left: -250px;
     }
+}
     /* --- Estilos da Página Minha Conta --- */
 .user-details-container {
     background-color: #fff;
@@ -591,58 +592,132 @@ img {
 #btn-logout-my-account:hover {
     background-color: #c82333 !important; /* Mais escuro para o hover do botão de sair */
 }
-/* --- Estilos do Painel de Administração --- */
+/* style.css */
+
+/* --- Estilos do Painel de Administração (VERSÃO MELHORADA) --- */
+
+/* Ajusta o container geral da página de admin para melhor espaçamento */
+#admin-panel.page-content {
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+/* Container para o formulário e a lista */
 .admin-form-container, .product-list-container {
-    background-color: #fff;
-    padding: 25px 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    margin: 20px auto;
+    background-color: #ffffff;
+    padding: 30px 35px; /* Mais preenchimento interno */
+    border-radius: 12px; /* Bordas mais arredondadas */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Sombra mais suave e destacada */
+    margin: 25px auto; /* Aumenta o espaço entre os elementos */
     max-width: 800px;
+    border: 1px solid #e9ecef; /* Borda sutil */
 }
+
+/* Títulos das seções (Adicionar Produto, Produtos Existentes) */
 .admin-form-container h2, .product-list-container h2 {
-    margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    font-size: 1.5em; /* Tamanho do título */
+    color: #343a40; /* Cor mais escura */
+    margin-bottom: 25px; /* Espaço abaixo do título */
+    padding-bottom: 15px; /* Espaço até a borda */
+    border-bottom: 2px solid #f1f3f5; /* Borda inferior mais suave */
+    font-weight: 600; /* Fonte um pouco mais forte */
 }
+
+/* Grupos de formulário (label + input) */
 #product-form .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     text-align: left;
 }
+
+/* Labels dos campos */
 #product-form label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
+    margin-bottom: 8px;
+    font-weight: 500; /* Peso da fonte */
+    color: #495057; /* Cor do texto */
+    font-size: 0.95em;
 }
+
+/* Inputs, Textarea e Select - Estilo unificado */
 #product-form input, #product-form textarea, #product-form select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 12px 15px; /* Padding interno */
+    border: 1px solid #ced4da; /* Borda padrão */
+    border-radius: 8px; /* Bordas mais arredondadas */
     font-size: 1em;
+    background-color: #f8f9fa; /* Fundo sutilmente cinza */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Transição suave */
 }
+
+/* Efeito de foco nos inputs */
+#product-form input:focus, #product-form textarea:focus, #product-form select:focus {
+    border-color: #80bdff; /* Borda azul ao focar */
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra externa azul */
+}
+
+/* Botão Salvar Produto */
+#product-form .btn-login { /* Reutilizando a classe do botão de login */
+    font-size: 1em;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 10px;
+}
+
+/* Tabela de Produtos */
 #product-list-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    font-size: 0.95em;
 }
+
+/* Células do cabeçalho e do corpo da tabela */
 #product-list-table th, #product-list-table td {
-    border: 1px solid #ddd;
-    padding: 12px;
+    border-bottom: 1px solid #dee2e6; /* Apenas bordas horizontais */
+    padding: 15px; /* Mais espaçamento interno */
     text-align: left;
+    vertical-align: middle; /* Alinha o texto no meio verticalmente */
 }
+
+/* Cabeçalho da tabela */
 #product-list-table th {
-    background-color: #f8f9fa;
+    background-color: #f8f9fa; /* Fundo cinza claro */
+    color: #495057;
+    font-weight: 600;
+    border-top: 1px solid #dee2e6;
 }
+
+/* Remove a borda da última linha para um visual mais limpo */
+#product-list-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Estilo zebrado para as linhas (alterna cores) */
+#product-list-table tbody tr:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+
+/* Botões de Ação na Tabela (Editar, Excluir) */
 .btn-edit, .btn-delete {
-    padding: 5px 10px;
+    padding: 6px 12px; /* Tamanho dos botões */
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     color: white;
     cursor: pointer;
     margin-right: 5px;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease;
 }
-.btn-edit { background-color: #007bff; }
-.btn-delete { background-color: #dc3545; }
+.btn-edit:hover, .btn-delete:hover {
+    opacity: 0.85; /* Efeito de hover sutil */
 }
+
+.btn-edit { background-color: #007bff; } /* Azul */
+.btn-delete { background-color: #dc3545; } /* Vermelho */

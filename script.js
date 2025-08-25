@@ -438,20 +438,17 @@ function showPageContent(targetId) {
                 populateFormForEdit(parseInt(id));
                 return;
             }
-            if (target.classList.contains('btn-delete')) {
+            // Ação para o botão de Excluir
+if (target.classList.contains('btn-delete')) {
     if (confirm(`Tem certeza que deseja excluir o produto ID ${id}?`)) {
         try {
-            // A URL agora inclui o ID do admin para verificação
+            // Este é o "sinal" correto a ser enviado
             const url = `http://localhost:3000/api/produtos/${id}?userId=${usuarioLogado.id}`;
-
-            const response = await fetch(url, {
-                method: 'DELETE' // A requisição ficou mais simples
-            });
-
+            const response = await fetch(url, { method: 'DELETE' });
             const result = await response.json();
 
             if (response.ok) {
-                alert(result.message);
+                alert(result.message); // Ex: "Produto deletado com sucesso!"
                 fetchAndDisplayAdminProducts();
                 renderizarProdutos();
             } else {
