@@ -24,10 +24,18 @@ const db = mysql.createPool({
 
 
 // --- 4. MIDDLEWARE DE SEGURANÇA (Porteiro Admin) - CORRIGIDO ---
+// O "porteiro" que agora sabe ler o "post-it"
 const isAdmin = async (req, res, next) => {
-    // Unifica a forma de obter o userId. Ele pode vir do corpo (para POST/PUT)
-    // ou da query string (para DELETE).
-    const userId = req.body.userId || req.query.userId;
+    let userId;
+
+    // LÓGICA CORRIGIDA: Verifica se req.body existe ANTES de tentar ler
+    if (req.body && req.body.userId) {
+        userId = req.body.userId;
+    } 
+    // Se não encontrou no body, procura na query (para o DELETE)
+    else if (req.query && req.query.userId) {
+        userId = req.query.userId;
+    }
 
     if (!userId) {
         return res.status(401).json({ error: 'Acesso não autorizado: ID do usuário faltando.' });
@@ -38,15 +46,15 @@ const isAdmin = async (req, res, next) => {
         const [results] = await db.query(sql, [userId]);
 
         if (results.length > 0 && results[0].role === 'admin') {
-            next(); // Permissão concedida
+            next();
         } else {
             return res.status(403).json({ error: 'Acesso negado: você não é um administrador.' });
         }
     } catch (error) {
+        console.error("ERRO CRÍTICO no middleware isAdmin:", error);
         return res.status(500).json({ error: 'Erro interno ao verificar permissões.' });
     }
 };
-
 
 // --- 5. ROTAS DE AUTENTICAÇÃO ---
 app.post('/api/register', async (req, res) => {
