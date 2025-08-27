@@ -1,172 +1,161 @@
-// backend/server.js (VERSÃO FINAL E COMPLETA)
+// backend/server.js (VERSÃO FINAL E CORRIGIDA)
 
-// 1. Importações e Configurações
+// 1. Importações
 const express = require('express');
-const mysql = require('mysql2');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+
+// 2. Configurações
 const app = express();
 const PORT = 3000;
 const saltRounds = 10;
-
-// 2. Middlewares
 app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
 
-// 3. Conexão com o Banco de Dados
-const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'penicius'
-}).promise();
+// 3. Conexão com o Banco de Dados MongoDB Atlas
+const MONGO_URI = "mongodb+srv://gpedroifpr:PedroSamara123@penicius.s0ji1as.mongodb.net/penicius_db?retryWrites=true&w=majority&appName=penicius";
 
+mongoose.connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log("Conectado com sucesso ao banco de dados MongoDB Atlas!");
+}).catch(err => {
+    console.error("Erro ao conectar ao MongoDB:", err);
+});
 
-// --- 4. MIDDLEWARE DE SEGURANÇA (Porteiro Admin) - CORRIGIDO ---
-// O "porteiro" que agora sabe ler o "post-it"
+// 4. Modelos (Schemas)
+const UsuarioSchema = new mongoose.Schema({
+    nome: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    senha: { type: String, required: true },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' }
+});
+const Usuario = mongoose.model('Usuario', UsuarioSchema);
+
+const ProdutoSchema = new mongoose.Schema({
+    nome: { type: String, required: true },
+    descricao: String,
+    preco: { type: Number, required: true },
+    categoria: { type: String, required: true },
+    imagem_url: String
+});
+const Produto = mongoose.model('Produto', ProdutoSchema);
+
+// --- 5. MIDDLEWARE DE SEGURANÇA ---
 const isAdmin = async (req, res, next) => {
-    let userId;
-
-    // LÓGICA CORRIGIDA: Verifica se req.body existe ANTES de tentar ler
-    if (req.body && req.body.userId) {
-        userId = req.body.userId;
-    } 
-    // Se não encontrou no body, procura na query (para o DELETE)
-    else if (req.query && req.query.userId) {
-        userId = req.query.userId;
-    }
-
+    const userId = req.body.userId || req.query.userId;
     if (!userId) {
-        return res.status(401).json({ error: 'Acesso não autorizado: ID do usuário faltando.' });
+        return res.status(401).json({ error: 'Acesso não autorizado: ID faltando.' });
     }
-
     try {
-        const sql = `SELECT role FROM usuarios WHERE id = ?`;
-        const [results] = await db.query(sql, [userId]);
-
-        if (results.length > 0 && results[0].role === 'admin') {
+        const usuario = await Usuario.findById(userId);
+        if (usuario && usuario.role === 'admin') {
             next();
         } else {
-            return res.status(403).json({ error: 'Acesso negado: você não é um administrador.' });
+            return res.status(403).json({ error: 'Acesso negado: você não é um admin.' });
         }
     } catch (error) {
-        console.error("ERRO CRÍTICO no middleware isAdmin:", error);
-        return res.status(500).json({ error: 'Erro interno ao verificar permissões.' });
+        return res.status(500).json({ error: 'Erro ao verificar permissões.' });
     }
 };
 
-// --- 5. ROTAS DE AUTENTICAÇÃO ---
+// --- 6. ROTAS DE AUTENTICAÇÃO ---
 app.post('/api/register', async (req, res) => {
     const { nome, email, senha } = req.body;
-
-    if (!nome || !email || !senha) {
-        return res.status(400).json({ error: "Por favor, preencha todos os campos." });
-    }
-
     try {
         const hash = await bcrypt.hash(senha, saltRounds);
-        const sql = `INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)`;
-        await db.query(sql, [nome, email, hash]);
+        const novoUsuario = new Usuario({ nome, email, senha: hash });
+        await novoUsuario.save();
         res.status(201).json({ message: "Usuário cadastrado com sucesso!" });
     } catch (err) {
-        if (err.code === 'ER_DUP_ENTRY') {
+        if (err.code === 11000) {
             return res.status(400).json({ error: "Este email já está cadastrado." });
         }
-        console.error("Erro no registro:", err);
-        return res.status(500).json({ error: "Erro interno ao cadastrar usuário." });
+        res.status(500).json({ error: "Erro interno ao cadastrar." });
     }
 });
 
 app.post('/api/login', async (req, res) => {
     const { email, senha } = req.body;
     try {
-        const sql = `SELECT * FROM usuarios WHERE email = ?`;
-        const [results] = await db.query(sql, [email]);
-
-        if (results.length > 0) {
-            const usuario = results[0];
-            const match = await bcrypt.compare(senha, usuario.senha);
-            if (match) {
-                res.status(200).json({
-                    message: "Login realizado com sucesso!",
-                    usuario: {
-                        id: usuario.id,
-                        nome: usuario.nome,
-                        email: usuario.email,
-                        role: usuario.role
-                    }
-                });
-            } else {
-                res.status(401).json({ error: "Email ou senha inválidos." });
-            }
+        const usuario = await Usuario.findOne({ email });
+        if (!usuario) {
+            return res.status(401).json({ error: "Email ou senha inválidos." });
+        }
+        const match = await bcrypt.compare(senha, usuario.senha);
+        if (match) {
+            res.status(200).json({
+                message: "Login realizado!",
+                usuario: { id: usuario._id, nome: usuario.nome, email: usuario.email, role: usuario.role }
+            });
         } else {
             res.status(401).json({ error: "Email ou senha inválidos." });
         }
     } catch (err) {
-        console.error("Erro no login:", err);
-        res.status(500).json({ error: "Erro interno ao tentar fazer login." });
+        res.status(500).json({ error: "Erro interno no login." });
     }
 });
 
-
-// --- 6. ROTAS DO CRUD DE PRODUTOS ---
-
-// READ (Ler todos os produtos) - Rota pública
-app.get('/api/produtos', async (req, res) => {
+// --- 7. ROTAS DO CRUD DE PRODUTOS (SEM DUPLICAÇÃO) ---
+app.get('/api/produtospublic', async (req, res) => {
     try {
-        const sql = `SELECT * FROM produtos ORDER BY id DESC`;
-        const [produtos] = await db.query(sql);
+        const produtos = await Produto.find().sort({ _id: -1 });
         res.status(200).json(produtos);
     } catch (error) {
-        console.error("Erro ao buscar produtos:", error);
-        res.status(500).json({ error: 'Erro ao buscar produtos.' });
+        console.error("Erro no servidor ao buscar produtos:", error);
+        res.status(500).json({ error: "Ocorreu um erro interno ao buscar os produtos." });
     }
 });
 
-// CREATE (Criar um produto) - Rota protegida
+app.get('/api/produtos/:id', async (req, res) => {
+    try {
+        const produto = await Produto.findById(req.params.id);
+        if (produto) {
+            res.json(produto);
+        } else {
+            res.status(404).json({ error: "Produto não encontrado" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Erro ao buscar produto" });
+    }
+});
+
 app.post('/api/produtos', isAdmin, async (req, res) => {
-    const { nome, descricao, preco, categoria, imagem_url } = req.body;
     try {
-        const sql = `INSERT INTO produtos (nome, descricao, preco, categoria, imagem_url) VALUES (?, ?, ?, ?, ?)`;
-        const [result] = await db.query(sql, [nome, descricao, preco, categoria, imagem_url]);
-        res.status(201).json({ message: 'Produto criado com sucesso!', id: result.insertId });
+        const novoProduto = new Produto(req.body);
+        await novoProduto.save();
+        res.status(201).json({ message: 'Produto criado com sucesso!' });
     } catch (error) {
-        console.error("Erro ao criar produto:", error);
-        res.status(500).json({ error: 'Erro ao criar produto.' });
+        res.status(500).json({ error: "Erro ao criar produto" });
     }
 });
 
-// UPDATE (Atualizar um produto) - Rota protegida
 app.put('/api/produtos/:id', isAdmin, async (req, res) => {
-    const { id } = req.params;
-    const { nome, descricao, preco, categoria, imagem_url } = req.body;
     try {
-        const sql = `UPDATE produtos SET nome = ?, descricao = ?, preco = ?, categoria = ?, imagem_url = ? WHERE id = ?`;
-        await db.query(sql, [nome, descricao, preco, categoria, imagem_url, id]);
-        res.status(200).json({ message: 'Produto atualizado com sucesso!' });
+        await Produto.findByIdAndUpdate(req.params.id, req.body);
+        res.json({ message: 'Produto atualizado com sucesso!' });
     } catch (error) {
-        console.error("Erro ao atualizar produto:", error);
-        res.status(500).json({ error: 'Erro ao atualizar produto.' });
+        res.status(500).json({ error: "Erro ao atualizar produto" });
     }
 });
 
-// DELETE (Deletar um produto) - Rota protegida
 app.delete('/api/produtos/:id', isAdmin, async (req, res) => {
-    const { id } = req.params;
     try {
-        const sql = `DELETE FROM produtos WHERE id = ?`;
-        await db.query(sql, [id]);
-        res.status(200).json({ message: 'Produto deletado com sucesso!' });
+        const result = await Produto.findByIdAndDelete(req.params.id);
+        if (result) {
+            res.json({ message: 'Produto deletado com sucesso!' });
+        } else {
+            res.status(404).json({ error: "Produto não encontrado" });
+        }
     } catch (error) {
-        console.error("Erro ao deletar produto:", error);
-        res.status(500).json({ error: 'Erro ao deletar produto.' });
+        res.status(500).json({ error: "Erro ao deletar produto" });
     }
 });
 
-
-// --- 7. Iniciar o servidor ---
+// --- 8. Iniciar o Servidor ---
 app.listen(PORT, () => {
     console.log(`Servidor rodando e ouvindo na porta http://localhost:${PORT}`);
-    console.log("Conectado com sucesso ao banco de dados MySQL 'penicius'");
 });

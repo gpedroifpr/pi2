@@ -1,0 +1,47 @@
+
+{
+"produtos": [
+{
+"nome": "Camisa Polo Clássica",
+"descricao": "Camisa polo de algodão piquet, perfeita para um look casual e elegante.",
+"preco": 129.90,
+"categoria": "masculino",
+"imagem_url": "/images/masculino/masculino1.jpg"
+},
+{
+"nome": "Calça Jeans Slim Fit",
+"descricao": "Calça jeans com lavagem moderna e corte slim, oferecendo conforto e estilo.",
+"preco": 249.90,
+"categoria": "masculino",
+"imagem_url": "/images/masculino/masculino2.jpg"
+},
+{
+"nome": "Jaqueta Corta-Vento",
+"descricao": "Jaqueta leve e resistente à água, ideal para atividades ao ar livre.",
+"preco": 299.00,
+"categoria": "modelos",
+"imagem_url": "/images/modelos/modelo1.jpg"
+},
+{
+"nome": "Vestido Floral Infantil",
+"descricao": "Vestido rodado com estampa floral colorida, feito de algodão macio.",
+"preco": 89.90,
+"categoria": "infantil",
+"imagem_url": "/images/infantil/infantil1.jpg"
+},
+{
+"nome": "Conjunto Moletom Infantil",
+"descricao": "Conjunto confortável de blusa e calça de moletom para o dia a dia das crianças.",
+"preco": 149.90,
+"categoria": "infantil",
+"imagem_url": "/images/infantil/infantil2.jpg"
+},
+{
+"nome": "Tênis Casual Urbano",
+"descricao": "Tênis versátil para compor looks modernos e despojados.",
+"preco": 349.50,
+"categoria": "modelos",
+"imagem_url": "/images/modelos/modelo2.jpg"
+}
+]
+}
