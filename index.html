@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PENICIUS</title>
+    <title>Vitrine Chic - A sua vitrine de moda</title>
+    <!-- Fontes do Google para um visual mais moderno -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,12 +41,12 @@
                         <label for="login-senha">Senha:</label>
                         <input type="password" id="login-senha" name="senha" required>
                     </div>
-                    <button type="submit" class="btn-login">Entrar</button>
+                    <button type="submit" class="btn-primary">Entrar</button>
                 </form>
-                <p class="signup-link">
+                <p class="form-switch-link">
                     Não tem uma conta? <a href="#" class="go-to-register">Cadastre-se</a>
                 </p>
-                 <button class="close-login-btn" aria-label="Fechar Login">×</button>
+                 <button class="close-modal-btn" aria-label="Fechar Login">×</button>
             </div>
         </div>
     </div>
@@ -69,12 +73,12 @@
                         <label for="register-confirmar-senha">Confirmar Senha:</label>
                         <input type="password" id="register-confirmar-senha" name="confirmar_senha" required>
                     </div>
-                    <button type="submit" class="btn-login btn-register">Cadastrar</button>
+                    <button type="submit" class="btn-primary">Cadastrar</button>
                 </form>
-                <p class="login-link">
+                <p class="form-switch-link">
                     Já tem uma conta? <a href="#" class="go-to-login-from-register">Faça Login</a>
                 </p>
-                 <button class="close-register-btn" aria-label="Fechar Cadastro">×</button>
+                 <button class="close-modal-btn" aria-label="Fechar Cadastro">×</button>
             </div>
         </div>
     </div>
@@ -88,20 +92,12 @@
                     <span class="hamburger-icon"></span>
                 </button>
             </div>
-            <div class="search-bar">
-                <input type="search" placeholder="Pesquisar...">
-            </div>
+            
+            <div class="site-brand">Vitrine Chic</div>
+
             <div class="header-right">
-                <a href="#" class="site-logo-header go-to-login" title="Ir para Login">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="#A0B8D0"/>
-                        <path d="M50 15 L85 50 L50 85 L15 50 Z" fill="#D0E0F0"/>
-                        <path d="M50 25 L75 50 L50 75 L25 50 Z" fill="#FFFFFF"/>
-                    </svg>
-                </a>
                 <div class="auth-links">
-                    <a href="#" class="go-to-register">Cadastrar</a>
-                    <a href="#" class="go-to-login">Entrar</a>
+                    <!-- Conteúdo inserido pelo script.js -->
                 </div>
             </div>
         </header>
@@ -130,88 +126,93 @@
 
             <section id="sobre" class="page-content">
                 <h1 class="page-title">Sobre Nós</h1>
-                <p class="about-text">
-                    Bem-vindo à PENICIUS! Somos apaixonados por moda e dedicados a oferecer as últimas tendências com qualidade e estilo para todos os públicos.
-                    Nossa missão é proporcionar uma experiência de compra única, com peças que expressam individualidade e conforto.
-                    Desde o início, buscamos inovar e trazer o melhor do mundo da moda para você, seja para o dia a dia, ocasiões especiais ou para os pequenos.
-                    Explore nossas coleções e descubra o look perfeito que combina com você!
-                </p>
+                <div class="about-container">
+                    <p class="about-text">
+                        Bem-vindo à Vitrine Chic! Somos apaixonados por moda e dedicados a oferecer as últimas tendências com qualidade e estilo para todos os públicos.
+                        Nossa missão é proporcionar uma experiência de compra única, com peças que expressam individualidade e conforto.
+                        Desde o início, buscamos inovar e trazer o melhor do mundo da moda para você, seja para o dia a dia, ocasiões especiais ou para os pequenos.
+                        Explore nossas coleções e descubra o look perfeito que combina com você!
+                    </p>
+                </div>
             </section>
 
-                        </section> <!-- Fim da seção sobre -->
-                              <!-- =============== PAINEL DE ADMINISTRAÇÃO =============== -->
-        <!--      Esta seção só será visível para o usuário admin      -->
-        <section id="admin-panel" class="page-content" style="display: none;">
-            <h1 class="page-title">Gerenciar Produtos</h1>
+            <!-- =============== PAINEL DE ADMINISTRAÇÃO =============== -->
+            <section id="admin-panel" class="page-content" style="display: none;">
+                <h1 class="page-title">Painel de Administração</h1>
+                <div class="admin-layout">
+                    <!-- Formulário para Adicionar/Editar Produtos -->
+                    <div class="admin-form-container">
+                        <h2 id="form-title">Adicionar Novo Produto</h2>
+                        <form id="product-form">
+                            <input type="hidden" id="product-id">
+                            <div class="form-group">
+                                <label for="product-nome">Nome do Produto</label>
+                                <input type="text" id="product-nome" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-descricao">Descrição</label>
+                                <textarea id="product-descricao" rows="4"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-preco">Preço (R$)</label>
+                                <input type="number" step="0.01" id="product-preco" placeholder="ex: 199.90" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-categoria">Categoria</label>
+                                <select id="product-categoria" required>
+                                    <option value="" disabled selected>Selecione uma categoria</option>
+                                    <option value="modelos">Modelos Destaque</option>
+                                    <option value="masculino">Masculino</option>
+                                    <option value="infantil">Infantil</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-imagem">URL da Imagem</label>
+                                <input type="text" id="product-imagem" placeholder="/images/categoria/imagem.jpg">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">Salvar Produto</button>
+                                <button type="button" id="cancel-edit-btn" class="btn-secondary" style="display:none;">Cancelar Edição</button>
+                            </div>
+                        </form>
+                    </div>
 
-            <!-- Formulário para Adicionar/Editar Produtos -->
-            <div class="admin-form-container">
-                <h2 id="form-title">Adicionar Novo Produto</h2>
-                <form id="product-form">
-                    <input type="hidden" id="product-id">
-                    <div class="form-group">
-                        <label for="product-nome">Nome do Produto</label>
-                        <input type="text" id="product-nome" required>
+                    <!-- Lista de Produtos Cadastrados -->
+                    <div class="product-list-container">
+                        <h2>Produtos Existentes</h2>
+                        <div class="table-wrapper">
+                            <table id="product-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Preço</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="product-list-body">
+                                    <!-- Produtos serão inseridos aqui pelo JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="product-descricao">Descrição</label>
-                        <textarea id="product-descricao" rows="4"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-preco">Preço (ex: 199.90)</label>
-                        <input type="number" step="0.01" id="product-preco" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-categoria">Categoria</label>
-                        <select id="product-categoria" required>
-                            <option value="modelos">Modelos Destaque</option>
-                            <option value="masculino">Masculino</option>
-                            <option value="infantil">Infantil</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-imagem">URL da Imagem (ex: /images/modelo/novo.jpg)</label>
-                        <input type="text" id="product-imagem">
-                    </div>
-                    <button type="submit" class="btn-login">Salvar Produto</button>
-                    <button type="button" id="cancel-edit-btn" class="btn-login" style="display:none; background-color: #6c757d;">Cancelar Edição</button>
-                </form>
-            </div>
-
-            <!-- Lista de Produtos Cadastrados -->
-            <div class="product-list-container">
-                <h2>Produtos Existentes</h2>
-                <table id="product-list-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Preço</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="product-list-body">
-                        <!-- Produtos serão inseridos aqui pelo JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-<!-- ... resto do código ... -->
+                </div>
+            </section>
 
             <section id="minha-conta" class="page-content">
                 <h1 class="page-title">Minha Conta</h1>
                 <div class="user-details-container">
                     <h2>Detalhes do Usuário</h2>
-                    <p><strong>Nome:</strong> <span id="user-name-display">Carregando...</span></p>
-                    <p><strong>Email:</strong> <span id="user-email-display">Carregando...</span></p>
-                    <!-- Você pode adicionar mais informações do usuário aqui no futuro -->
-                    <button id="btn-logout-my-account" class="btn-login" style="background-color: #dc3545; margin-top: 30px; width: auto; padding: 10px 20px;">Sair da Conta</button>
+                    <div class="user-info-group">
+                      <p><strong>Nome:</strong> <span id="user-name-display">Carregando...</span></p>
+                      <p><strong>Email:</strong> <span id="user-email-display">Carregando...</span></p>
+                    </div>
+                    <button id="btn-logout-my-account" class="btn-danger">Sair da Conta</button>
                 </div>
             </section>
         </main>
 
         <footer class="site-footer">
-            <p>© 2024 PENICIUS. Todos os direitos reservados.</p>
+            <p>© 2024 Vitrine Chic. Todos os direitos reservados.</p>
         </footer>
     </div>
 

@@ -21,13 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeRegisterButton = document.querySelector('.close-register-btn');
 
     const authLinksHeader = document.querySelector('.site-header .auth-links');
-    const siteLogoHeader = document.querySelector('.site-logo-header');
 
     const userNameDisplay = document.getElementById('user-name-display');
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogoutMyAccount = document.getElementById('btn-logout-my-account');
 
-    // --- NOVOS SELETORES DO PAINEL ADMIN ---
+    // --- SELETORES DO PAINEL ADMIN ---
     const adminPanel = document.getElementById('admin-panel');
     const productForm = document.getElementById('product-form');
     const productListBody = document.getElementById('product-list-body');
@@ -35,24 +34,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const productIdInput = document.getElementById('product-id');
     const cancelEditBtn = document.getElementById('cancel-edit-btn');
 
+    // --- ÍCONE DO USUÁRIO ---
+    const userIconSVG = `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="#A0B8D0"/>
+            <path d="M50 15 L85 50 L50 85 L15 50 Z" fill="#D0E0F0"/>
+            <path d="M50 25 L75 50 L50 75 L25 50 Z" fill="#FFFFFF"/>
+        </svg>`;
 
     // --- ESTADO DA APLICAÇÃO ---
     let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogadoPenicius')) || null;
 
 
-    // --- DADOS DOS PRODUTOS (AGORA DINÂMICOS) ---
+    // --- DADOS DOS PRODUTOS (DINÂMICOS) ---
     async function renderizarProdutos() {
         try {
             const response = await fetch('http://localhost:3000/api/produtos');
             if (!response.ok) throw new Error('Falha na resposta da rede ao buscar produtos');
             const produtos = await response.json();
 
-            // Separa os produtos por categoria
             const produtosModelos = produtos.filter(p => p.categoria === 'modelos');
             const produtosMasculinos = produtos.filter(p => p.categoria === 'masculino');
             const produtosInfantis = produtos.filter(p => p.categoria === 'infantil');
 
-            // Renderiza cada seção
             renderizarSecao('grid-modelos', produtosModelos);
             renderizarSecao('grid-masculino', produtosMasculinos);
             renderizarSecao('grid-infantil', produtosInfantis);
@@ -85,98 +89,91 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- FUNÇÕES AUXILIARES ---
-  // script.js
-
-function updateUIBasedOnLoginState() {
-    // Primeiro, limpa qualquer estado anterior para evitar duplicações
-    const oldAdminLink = sideMenu.querySelector('[data-target="admin-panel"]');
-    if (oldAdminLink) {
-        oldAdminLink.remove();
-    }
-    if (adminPanel) {
-        adminPanel.style.display = 'none';
-    }
-
-    // Adiciona um log para sabermos que a função rodou e qual o estado do usuário
-    console.log("Atualizando UI. Usuário logado:", usuarioLogado);
-
-    if (usuarioLogado) {
-        // --- Interface para usuário LOGADO ---
-        if (authLinksHeader) {
-            authLinksHeader.innerHTML = `<a href="#" id="my-account-link-header" data-target="min-conta">Olá, ${usuarioLogado.nome.split(' ')[0]}</a> <a href="#" id="logout-link">Sair</a>`;
+    // --- FUNÇÕES AUXILIARES DE UI ---
+    function updateUIBasedOnLoginState() {
+        const oldAdminLink = sideMenu.querySelector('[data-target="admin-panel"]');
+        if (oldAdminLink) {
+            oldAdminLink.remove();
         }
-        if (siteLogoHeader) {
-            siteLogoHeader.classList.remove('go-to-login');
-            siteLogoHeader.title = "Ver Minha Conta";
-            siteLogoHeader.dataset.action = 'go-to-my-account-logo';
+        if (adminPanel) {
+            adminPanel.style.display = 'none';
         }
-        const authLinksSideMenu = sideMenu ? sideMenu.querySelectorAll('.side-menu-link') : [];
-        authLinksSideMenu.forEach(link => {
-            if (link.classList.contains('go-to-login')) {
-                link.textContent = 'Minha Conta';
-                link.classList.remove('go-to-login');
-                link.dataset.target = "minha-conta";
-                link.href = "#minha-conta";
-            } else if (link.classList.contains('go-to-register')) {
-                link.style.display = 'none';
+
+        console.log("Atualizando UI. Usuário logado:", usuarioLogado);
+
+        if (usuarioLogado) {
+            // --- Interface para usuário LOGADO ---
+            if (authLinksHeader) {
+                authLinksHeader.innerHTML = `
+                    <a href="#" id="my-account-link-header" data-target="minha-conta">
+                        ${userIconSVG}
+                        <span>Olá, ${usuarioLogado.nome.split(' ')[0]}</span>
+                    </a> 
+                    <a href="#" id="logout-link">Sair</a>`;
             }
-        });
 
-        // --- LÓGICA DE ADMINISTRAÇÃO ---
-        // Adiciona um log para verificar a "role" do usuário
-        console.log("Verificando se é admin. Role do usuário:", usuarioLogado.role);
+            const authLinksSideMenu = sideMenu ? sideMenu.querySelectorAll('.side-menu-link') : [];
+            authLinksSideMenu.forEach(link => {
+                if (link.classList.contains('go-to-login')) {
+                    link.textContent = 'Minha Conta';
+                    link.classList.remove('go-to-login');
+                    link.dataset.target = "minha-conta";
+                    link.href = "#minha-conta";
+                } else if (link.classList.contains('go-to-register')) {
+                    link.style.display = 'none';
+                }
+            });
 
-        if (usuarioLogado.role === 'admin') {
-            // Log de confirmação
-            console.log("É ADMIN! Adicionando o link e mostrando o painel.");
+            // --- LÓGICA DE ADMINISTRAÇÃO ---
+            if (usuarioLogado.role === 'admin') {
+                console.log("É ADMIN! Adicionando o link e mostrando o painel.");
+                
+                const adminLinkInMenu = document.createElement('a');
+                adminLinkInMenu.href = "#admin-panel";
+                adminLinkInMenu.textContent = "Gerenciar Produtos";
+                adminLinkInMenu.classList.add('side-menu-link', 'nav-link');
+                adminLinkInMenu.dataset.target = 'admin-panel';
+
+                const aboutUsLink = sideMenu.querySelector('[data-target="sobre"]');
+                if (aboutUsLink) {
+                    aboutUsLink.insertAdjacentElement('afterend', adminLinkInMenu);
+                } else {
+                    sideMenu.appendChild(adminLinkInMenu);
+                }
+                adminPanel.style.display = 'block';
+                fetchAndDisplayAdminProducts();
+            }
+
+        } else {
+            // --- Interface para usuário DESLOGADO ---
+            console.log("Nenhum usuário logado. Configurando UI para visitante.");
+
+            if (authLinksHeader) {
+                authLinksHeader.innerHTML = `
+                    <a href="#" class="go-to-register">Cadastrar</a> 
+                    <a href="#" class="go-to-login">
+                        ${userIconSVG}
+                        <span>Entrar</span>
+                    </a>`;
+            }
             
-            const adminLinkInMenu = document.createElement('a');
-            adminLinkInMenu.href = "#admin-panel";
-            adminLinkInMenu.textContent = "Gerenciar Produtos";
-            adminLinkInMenu.classList.add('side-menu-link', 'nav-link');
-            adminLinkInMenu.dataset.target = 'admin-panel';
-
-            const aboutUsLink = sideMenu.querySelector('[data-target="sobre"]');
-            if (aboutUsLink) {
-                aboutUsLink.insertAdjacentElement('afterend', adminLinkInMenu);
-            } else {
-                // Caso o link "Sobre Nós" não seja encontrado, adiciona no final do menu
-                sideMenu.appendChild(adminLinkInMenu);
-            }
-            adminPanel.style.display = 'block';
-            fetchAndDisplayAdminProducts();
+            const authLinksSideMenu = sideMenu ? sideMenu.querySelectorAll('.side-menu-link') : [];
+            authLinksSideMenu.forEach(link => {
+                const originalText = link.dataset.originalText || 'Minha Conta / Login';
+                if (link.dataset.target === 'minha-conta') {
+                    link.textContent = originalText;
+                    link.classList.add('go-to-login');
+                    delete link.dataset.target;
+                    link.href = "#";
+                }
+                const registerLinkInSideMenu = sideMenu ? sideMenu.querySelector('.go-to-register') : null;
+                if (registerLinkInSideMenu) {
+                    registerLinkInSideMenu.style.display = 'block';
+                    registerLinkInSideMenu.textContent = 'Cadastrar';
+                }
+            });
         }
-
-    } else {
-        // --- Interface para usuário DESLOGADO ---
-        console.log("Nenhum usuário logado. Configurando UI para visitante.");
-
-        if (authLinksHeader) {
-            authLinksHeader.innerHTML = `<a href="#" class="go-to-register">Cadastrar</a> <a href="#" class="go-to-login">Entrar</a>`;
-        }
-        if (siteLogoHeader) {
-            siteLogoHeader.classList.add('go-to-login');
-            siteLogoHeader.title = "Ir para Login";
-            delete siteLogoHeader.dataset.action;
-        }
-        const authLinksSideMenu = sideMenu ? sideMenu.querySelectorAll('.side-menu-link') : [];
-        authLinksSideMenu.forEach(link => {
-            const originalText = link.dataset.originalText || 'Minha Conta / Login';
-            if (link.dataset.target === 'minha-conta') {
-                link.textContent = originalText;
-                link.classList.add('go-to-login');
-                delete link.dataset.target;
-                link.href = "#";
-            }
-            const registerLinkInSideMenu = sideMenu ? sideMenu.querySelector('.go-to-register') : null;
-            if (registerLinkInSideMenu) {
-                registerLinkInSideMenu.style.display = 'block';
-                registerLinkInSideMenu.textContent = 'Cadastrar';
-            }
-        });
     }
-}
 
     function populateMinhaConta() {
         if (usuarioLogado) {
@@ -210,62 +207,56 @@ function updateUIBasedOnLoginState() {
         document.body.style.overflow = '';
     }
 
-    // SUBSTITUA A SUA FUNÇÃO 'showPageContent' POR ESTA
+    function showPageContent(targetId) {
+        if (!targetId) return;
 
-function showPageContent(targetId) {
-    if (!targetId) return;
-
-    if ((targetId === 'minha-conta' || targetId === 'admin-panel') && !usuarioLogado) {
-        showLoginScreen();
-        return;
-    }
-
-    // --- CORREÇÃO PRINCIPAL ---
-    // Força TODAS as seções de conteúdo a serem escondidas primeiro.
-    pageContents.forEach(page => {
-        if (page) {
-            page.classList.remove('active-page');
-            page.style.display = 'none'; // A linha chave que força o elemento a sumir.
+        if ((targetId === 'minha-conta' || targetId === 'admin-panel') && !usuarioLogado) {
+            showLoginScreen();
+            return;
         }
-    });
 
-    // Em seguida, mostra APENAS a seção alvo.
-    const pageToShow = document.getElementById(targetId);
-    if (pageToShow) {
-        pageToShow.classList.add('active-page');
-        pageToShow.style.display = 'block'; // A linha chave que força o elemento a aparecer.
-    }
-    // --- FIM DA CORREÇÃO ---
-    
-    // O resto da sua função original permanece para que tudo continue funcionando.
-    pageNavLinks.forEach(link => {
-        if (link) link.classList.remove('active-nav-link');
-        if (link && link.dataset.target === targetId) {
-            link.classList.add('active-nav-link');
+        pageContents.forEach(page => {
+            if (page) {
+                page.classList.remove('active-page');
+                page.style.display = 'none';
+            }
+        });
+
+        const pageToShow = document.getElementById(targetId);
+        if (pageToShow) {
+            pageToShow.classList.add('active-page');
+            pageToShow.style.display = 'block';
         }
-    });
+        
+        pageNavLinks.forEach(link => {
+            if (link) link.classList.remove('active-nav-link');
+            if (link && link.dataset.target === targetId) {
+                link.classList.add('active-nav-link');
+            }
+        });
 
-    if (targetId === 'minha-conta') {
-        populateMinhaConta();
-    }
+        if (targetId === 'minha-conta') {
+            populateMinhaConta();
+        }
 
-    const validContentPages = ['modelos', 'masculino', 'infantil', 'sobre', 'minha-conta', 'admin-panel'];
-    if (validContentPages.includes(targetId)) {
-        if (history.pushState) {
-            history.pushState({ page: targetId }, document.title, '#' + targetId);
-        } else {
-            window.location.hash = '#' + targetId;
+        const validContentPages = ['modelos', 'masculino', 'infantil', 'sobre', 'minha-conta', 'admin-panel'];
+        if (validContentPages.includes(targetId)) {
+            if (history.pushState) {
+                history.pushState({ page: targetId }, document.title, '#' + targetId);
+            } else {
+                window.location.hash = '#' + targetId;
+            }
+        }
+        
+        closeSideMenu();
+
+        if (targetId !== 'login-screen' && targetId !== 'register-screen') {
+            showMainApp();
         }
     }
-    
-    closeSideMenu();
 
-    if (targetId !== 'login-screen' && targetId !== 'register-screen') {
-        showMainApp();
-    }
-}
 
-    // --- LÓGICA DE CADASTRO, LOGIN E LOGOUT ---
+    // --- LÓGICA DE AUTENTICAÇÃO ---
     if (registerForm) {
         registerForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -360,7 +351,6 @@ function showPageContent(targetId) {
                 const precoFormatado = Number(product.preco).toFixed(2).replace('.', ',');
                 productListBody.innerHTML += `
                     <tr>
-                        <td>${product._id}</td>
                         <td>${product.nome}</td>
                         <td>R$ ${precoFormatado}</td>
                         <td>
@@ -424,7 +414,7 @@ function showPageContent(targetId) {
                     alert(result.message);
                     resetProductForm();
                     fetchAndDisplayAdminProducts();
-                    renderizarProdutos(); // Atualiza a vitrine principal
+                    renderizarProdutos();
                 } else { alert(`Erro: ${result.error}`); }
             } catch (error) { console.error('Erro ao salvar produto:', error); }
         });
@@ -438,28 +428,26 @@ function showPageContent(targetId) {
                 populateFormForEdit(id);
                 return;
             }
-            // Ação para o botão de Excluir
-if (target.classList.contains('btn-delete')) {
-    if (confirm(`Tem certeza que deseja excluir o produto ID ${id}?`)) {
-        try {
-            // Este é o "sinal" correto a ser enviado
-            const url = `http://localhost:3000/api/produtos/${id}?userId=${usuarioLogado.id}`;
-            const response = await fetch(url, { method: 'DELETE' });
-            const result = await response.json();
+            if (target.classList.contains('btn-delete')) {
+                if (confirm(`Tem certeza que deseja excluir o produto ID ${id}?`)) {
+                    try {
+                        const url = `http://localhost:3000/api/produtos/${id}?userId=${usuarioLogado.id}`;
+                        const response = await fetch(url, { method: 'DELETE' });
+                        const result = await response.json();
 
-            if (response.ok) {
-                alert(result.message); // Ex: "Produto deletado com sucesso!"
-                fetchAndDisplayAdminProducts();
-                renderizarProdutos();
-            } else {
-                alert(`Erro: ${result.error}`);
+                        if (response.ok) {
+                            alert(result.message);
+                            fetchAndDisplayAdminProducts();
+                            renderizarProdutos();
+                        } else {
+                            alert(`Erro: ${result.error}`);
+                        }
+                    } catch (error) {
+                        console.error('Erro ao deletar produto:', error);
+                        alert('Ocorreu um erro de rede ao tentar deletar o produto.');
+                    }
+                }
             }
-        } catch (error) {
-            console.error('Erro ao deletar produto:', error);
-            alert('Ocorreu um erro de rede ao tentar deletar o produto.');
-        }
-    }
-}
         });
     }
 
@@ -486,7 +474,6 @@ if (target.classList.contains('btn-delete')) {
         if (targetElement.classList.contains('go-to-login')) { event.preventDefault(); showLoginScreen(); }
         else if (targetElement.classList.contains('go-to-register')) { event.preventDefault(); showRegisterScreen(); }
         else if (targetElement.id === 'my-account-link-header') { event.preventDefault(); showPageContent('minha-conta'); }
-        else if (targetElement.dataset.action === 'go-to-my-account-logo') { event.preventDefault(); showPageContent('minha-conta'); }
         else if (targetElement.id === 'logout-link') { event.preventDefault(); handleLogout(); }
         else if (targetElement.classList.contains('go-to-login-from-register')) { event.preventDefault(); showLoginScreen(); }
     });
