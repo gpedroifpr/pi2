@@ -71,6 +71,7 @@ const isAdmin = async (req, res, next) => {
 
 // --- 6. ROTAS DE AUTENTICAÇÃO ---
 app.post('/api/register', async (req, res) => {
+    console.log(">>> EXECUTANDO O NOVO MIDDLEWARE ISADMIN - v2 <<<"); 
     const { nome, email, senha } = req.body;
     try {
         const hash = await bcrypt.hash(senha, saltRounds);
