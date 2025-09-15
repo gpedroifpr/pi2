@@ -360,7 +360,7 @@ function showPageContent(targetId) {
                 const precoFormatado = Number(product.preco).toFixed(2).replace('.', ',');
                 productListBody.innerHTML += `
                     <tr>
-                        <td>${product.id}</td>
+                        <td>${product._id}</td>
                         <td>${product.nome}</td>
                         <td>R$ ${precoFormatado}</td>
                         <td>
@@ -376,7 +376,7 @@ function showPageContent(targetId) {
         try {
             const response = await fetch('http://localhost:3000/api/produtos');
             const products = await response.json();
-            const product = products.find(p => p.id === id);
+            const product = products.find(p => p._id === id);
             if (product) {
                 formTitle.textContent = 'Editar Produto';
                 productIdInput.value = product.id;
@@ -435,7 +435,7 @@ function showPageContent(targetId) {
             const target = e.target;
             const id = target.dataset.id;
             if (target.classList.contains('btn-edit')) {
-                populateFormForEdit(parseInt(id));
+                populateFormForEdit(id);
                 return;
             }
             // Ação para o botão de Excluir
