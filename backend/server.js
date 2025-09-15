@@ -42,6 +42,7 @@ const Produto = mongoose.model('Produto', ProdutoSchema);
 
 // --- 5. MIDDLEWARE DE SEGURANÇA ---
 const isAdmin = async (req, res, next) => {
+    console.log(">>> EXECUTANDO O NOVO MIDDLEWARE ISADMIN - v2 <<<"); 
     const userId = req.body.userId || req.query.userId;
 
     // 1. Validação se o ID existe
@@ -71,7 +72,6 @@ const isAdmin = async (req, res, next) => {
 
 // --- 6. ROTAS DE AUTENTICAÇÃO ---
 app.post('/api/register', async (req, res) => {
-    console.log(">>> EXECUTANDO O NOVO MIDDLEWARE ISADMIN - v2 <<<"); 
     const { nome, email, senha } = req.body;
     try {
         const hash = await bcrypt.hash(senha, saltRounds);
