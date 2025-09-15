@@ -43,18 +43,29 @@ const Produto = mongoose.model('Produto', ProdutoSchema);
 // --- 5. MIDDLEWARE DE SEGURANÇA ---
 const isAdmin = async (req, res, next) => {
     const userId = req.body.userId || req.query.userId;
+
+    // 1. Validação se o ID existe
     if (!userId) {
-        return res.status(401).json({ error: 'Acesso não autorizado: ID faltando.' });
+        return res.status(401).json({ error: 'Acesso não autorizado: ID do usuário faltando.' });
     }
+
+    // 2. NOVA VALIDAÇÃO: Verifica se o formato do ID é válido para o MongoDB
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ error: 'ID de usuário fornecido não é válido.' });
+    }
+
+    // 3. Busca no banco de dados com segurança
     try {
         const usuario = await Usuario.findById(userId);
         if (usuario && usuario.role === 'admin') {
-            next();
+            next(); // Permissão concedida, continua para a próxima função (deletar, criar, etc.)
         } else {
-            return res.status(403).json({ error: 'Acesso negado: você não é um admin.' });
+            return res.status(403).json({ error: 'Acesso negado: você não tem permissão de administrador.' });
         }
     } catch (error) {
-        return res.status(500).json({ error: 'Erro ao verificar permissões.' });
+        // Este catch agora lida com outros erros inesperados do banco de dados
+        console.error("Erro no middleware isAdmin:", error);
+        return res.status(500).json({ error: 'Erro interno ao verificar permissões de usuário.' });
     }
 };
 
