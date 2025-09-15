@@ -364,8 +364,8 @@ function showPageContent(targetId) {
                         <td>${product.nome}</td>
                         <td>R$ ${precoFormatado}</td>
                         <td>
-                            <button class="btn-edit" data-id="${product.id}">Editar</button>
-                            <button class="btn-delete" data-id="${product.id}">Excluir</button>
+                            <button class="btn-edit" data-id="${product._id}">Editar</button>
+                            <button class="btn-delete" data-id="${product._id}">Excluir</button>
                         </td>
                     </tr>`;
             });
@@ -379,7 +379,7 @@ function showPageContent(targetId) {
             const product = products.find(p => p._id === id);
             if (product) {
                 formTitle.textContent = 'Editar Produto';
-                productIdInput.value = product.id;
+                productIdInput.value = product._id;
                 document.getElementById('product-nome').value = product.nome;
                 document.getElementById('product-descricao').value = product.descricao;
                 document.getElementById('product-preco').value = product.preco;
