@@ -613,4 +613,101 @@ img {
     .login-container { padding: 30px 20px; }
     .login-container h1 { font-size: 1.8rem; }
     .product-name { min-height: auto; }
+
+    /* === ESTILOS ADICIONAIS PARA MULTI-VITRINE (ADICIONAR AO FINAL DO CSS) === */
+
+/* Card para a lista de vitrines na página "Explorar" */
+.vitrine-card {
+    background-color: var(--white-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--secondary-color);
+}
+.vitrine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+    color: var(--primary-color);
+}
+.vitrine-name {
+    font-size: 1.5rem;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.vitrine-owner {
+    font-size: 0.9rem;
+    color: var(--grey-text);
+}
+
+/* Layout da página de vitrine dinâmica (vitrine.html) */
+.vitrine-layout {
+    display: flex;
+    gap: 30px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 40px 30px;
+}
+.side-menu-vitrine {
+    flex: 0 0 250px; /* Não cresce, não encolhe, base de 250px */
+    background-color: var(--white-color);
+    padding: 25px;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-light);
+    height: fit-content;
+    position: sticky;
+    top: 100px; /* Abaixo do header */
+}
+.side-menu-vitrine h3 {
+    font-family: var(--font-primary);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+.side-menu-vitrine a {
+    display: block;
+    padding: 10px 15px;
+    color: var(--grey-text);
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+.side-menu-vitrine a:hover {
+    background-color: var(--light-bg-color);
+    color: var(--primary-color);
+}
+.vitrine-layout .page-content {
+    flex-grow: 1;
+}
+.vitrine-category-section {
+    margin-bottom: 60px;
+}
+.back-home-link {
+    font-weight: 500;
+    color: var(--grey-text);
+}
+.back-home-link:hover {
+    color: var(--primary-color);
+}
+
+/* Melhorias no painel "Minha Conta" */
+.vitrine-management-container {
+    background-color: #fff;
+    padding: 30px;
+    margin-top: 30px;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-light);
+}
+
+#product-management-panel hr {
+    margin: 40px 0;
+}
 }

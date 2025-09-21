@@ -1,521 +1,327 @@
+// script.js (VERSÃO FINAL E COMPLETA - SEM OMISSÕES)
+
 document.addEventListener('DOMContentLoaded', () => {
-    // --- SELETORES DO DOM ---
+    // SELETORES GLOBAIS
+    const mainAppScreen = document.getElementById('main-app');
     const loginScreen = document.getElementById('login-screen');
     const registerScreen = document.getElementById('register-screen');
-    const mainAppScreen = document.getElementById('main-app');
-    const minhaContaScreen = document.getElementById('minha-conta');
-
-    const loginForm = document.getElementById('login-form-actual');
-    const registerForm = document.getElementById('register-form-actual');
-
     const sideMenu = document.getElementById('sideMenu');
     const menuToggle = document.getElementById('menuToggle');
-    const closeSideMenuBtn = document.querySelector('.close-side-menu-btn');
     const menuOverlay = document.querySelector('.menu-overlay');
-
-    const pageNavLinks = document.querySelectorAll('.nav-link');
     const pageContents = document.querySelectorAll('.page-content');
-
-    const goToLoginFromRegister = document.querySelector('.go-to-login-from-register');
-    const closeLoginButton = document.querySelector('.close-login-btn');
-    const closeRegisterButton = document.querySelector('.close-register-btn');
-
     const authLinksHeader = document.querySelector('.site-header .auth-links');
 
-    const userNameDisplay = document.getElementById('user-name-display');
-    const userEmailDisplay = document.getElementById('user-email-display');
-    const btnLogoutMyAccount = document.getElementById('btn-logout-my-account');
-
-    // --- SELETORES DO PAINEL ADMIN ---
-    const adminPanel = document.getElementById('admin-panel');
-    const productForm = document.getElementById('product-form');
-    const productListBody = document.getElementById('product-list-body');
-    const formTitle = document.getElementById('form-title');
-    const productIdInput = document.getElementById('product-id');
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
-
-    // --- ÍCONE DO USUÁRIO ---
-    const userIconSVG = `
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 0 L100 50 L50 100 L0 50 Z" fill="#A0B8D0"/>
-            <path d="M50 15 L85 50 L50 85 L15 50 Z" fill="#D0E0F0"/>
-            <path d="M50 25 L75 50 L50 75 L25 50 Z" fill="#FFFFFF"/>
-        </svg>`;
-
-    // --- ESTADO DA APLICAÇÃO ---
+    // ESTADO DA APLICAÇÃO
     let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogadoPenicius')) || null;
 
-
-    // --- DADOS DOS PRODUTOS (DINÂMICOS) ---
-    async function renderizarProdutos() {
+    // =================================================================
+    // FUNÇÕES DE BUSCA DE DADOS (APIs)
+    // =================================================================
+    
+    async function fetchAndUpdateUsuarioLogado() {
+        if (!usuarioLogado || !usuarioLogado.id) return null;
         try {
-            const response = await fetch('http://localhost:3000/api/produtos');
-            if (!response.ok) throw new Error('Falha na resposta da rede ao buscar produtos');
-            const produtos = await response.json();
-
-            const produtosModelos = produtos.filter(p => p.categoria === 'modelos');
-            const produtosMasculinos = produtos.filter(p => p.categoria === 'masculino');
-            const produtosInfantis = produtos.filter(p => p.categoria === 'infantil');
-
-            renderizarSecao('grid-modelos', produtosModelos);
-            renderizarSecao('grid-masculino', produtosMasculinos);
-            renderizarSecao('grid-infantil', produtosInfantis);
-
+            const response = await fetch(`http://localhost:3000/api/meus-dados/${usuarioLogado.id}`);
+            const data = await response.json();
+            if (response.ok) {
+                usuarioLogado = data;
+                localStorage.setItem('usuarioLogadoPenicius', JSON.stringify(usuarioLogado));
+                return usuarioLogado;
+            } else {
+                handleLogout(); // Desloga se o usuário não for encontrado
+                return null;
+            }
         } catch (error) {
-            console.error("Não foi possível buscar os produtos:", error);
+            console.error("Erro ao atualizar dados do usuário:", error);
+            return null;
         }
     }
-
-    function renderizarSecao(containerId, arrayDeProdutos) {
-        const container = document.getElementById(containerId);
+    
+    // =================================================================
+    // FUNÇÕES DE RENDERIZAÇÃO
+    // =================================================================
+    
+    async function renderizarListaDeVitrines() {
+        const container = document.getElementById('grid-vitrines');
         if (!container) return;
-        container.innerHTML = '';
-        if (arrayDeProdutos.length === 0) {
-            container.innerHTML = '<p>Nenhum produto encontrado nesta categoria.</p>';
-            return;
-        }
-        arrayDeProdutos.forEach(produto => {
-            const precoFormatado = Number(produto.preco).toFixed(2).replace('.', ',');
-            container.innerHTML += `
-                <div class="product-card">
-                    <div class="product-image-container"><img src="${produto.imagem_url || '/images/placeholder.jpg'}" alt="${produto.nome}"></div>
-                    <div class="product-info">
-                        <h3 class="product-name">${produto.nome}</h3>
-                        <p class="product-price">R$ ${precoFormatado}</p>
-                        <button class="add-to-cart-btn">Ver Detalhes</button>
-                    </div>
-                </div>`;
-        });
-    }
-
-
-    // --- FUNÇÕES AUXILIARES DE UI ---
-    function updateUIBasedOnLoginState() {
-        const oldAdminLink = sideMenu.querySelector('[data-target="admin-panel"]');
-        if (oldAdminLink) {
-            oldAdminLink.remove();
-        }
-        if (adminPanel) {
-            adminPanel.style.display = 'none';
-        }
-
-        console.log("Atualizando UI. Usuário logado:", usuarioLogado);
-
-        if (usuarioLogado) {
-            // --- Interface para usuário LOGADO ---
-            if (authLinksHeader) {
-                authLinksHeader.innerHTML = `
-                    <a href="#" id="my-account-link-header" data-target="minha-conta">
-                        ${userIconSVG}
-                        <span>Olá, ${usuarioLogado.nome.split(' ')[0]}</span>
-                    </a> 
-                    <a href="#" id="logout-link">Sair</a>`;
+        container.innerHTML = '<p>Carregando vitrines...</p>';
+        try {
+            const response = await fetch('http://localhost:3000/api/vitrines');
+            const vitrines = await response.json();
+            container.innerHTML = '';
+            if (vitrines.length === 0) {
+                container.innerHTML = "<p>Nenhuma vitrine foi criada ainda. Seja o primeiro!</p>";
+                return;
             }
-
-            const authLinksSideMenu = sideMenu ? sideMenu.querySelectorAll('.side-menu-link') : [];
-            authLinksSideMenu.forEach(link => {
-                if (link.classList.contains('go-to-login')) {
-                    link.textContent = 'Minha Conta';
-                    link.classList.remove('go-to-login');
-                    link.dataset.target = "minha-conta";
-                    link.href = "#minha-conta";
-                } else if (link.classList.contains('go-to-register')) {
-                    link.style.display = 'none';
-                }
-            });
-
-            // --- LÓGICA DE ADMINISTRAÇÃO ---
-            if (usuarioLogado.role === 'admin') {
-                console.log("É ADMIN! Adicionando o link e mostrando o painel.");
-                
-                const adminLinkInMenu = document.createElement('a');
-                adminLinkInMenu.href = "#admin-panel";
-                adminLinkInMenu.textContent = "Gerenciar Produtos";
-                adminLinkInMenu.classList.add('side-menu-link', 'nav-link');
-                adminLinkInMenu.dataset.target = 'admin-panel';
-
-                const aboutUsLink = sideMenu.querySelector('[data-target="sobre"]');
-                if (aboutUsLink) {
-                    aboutUsLink.insertAdjacentElement('afterend', adminLinkInMenu);
-                } else {
-                    sideMenu.appendChild(adminLinkInMenu);
-                }
-                adminPanel.style.display = 'block';
-                fetchAndDisplayAdminProducts();
-            }
-
-        } else {
-            // --- Interface para usuário DESLOGADO ---
-            console.log("Nenhum usuário logado. Configurando UI para visitante.");
-
-            if (authLinksHeader) {
-                authLinksHeader.innerHTML = `
-                    <a href="#" class="go-to-register">Cadastrar</a> 
-                    <a href="#" class="go-to-login">
-                        ${userIconSVG}
-                        <span>Entrar</span>
+            vitrines.forEach(vitrine => {
+                container.innerHTML += `
+                    <a href="/vitrine.html?id=${vitrine._id}" class="vitrine-card">
+                        <div class="vitrine-info">
+                            <h3 class="vitrine-name">${vitrine.nome}</h3>
+                            <p class="vitrine-owner">Criado por: ${vitrine.dono.nome}</p>
+                        </div>
                     </a>`;
-            }
-            
-            const authLinksSideMenu = sideMenu ? sideMenu.querySelectorAll('.side-menu-link') : [];
-            authLinksSideMenu.forEach(link => {
-                const originalText = link.dataset.originalText || 'Minha Conta / Login';
-                if (link.dataset.target === 'minha-conta') {
-                    link.textContent = originalText;
-                    link.classList.add('go-to-login');
-                    delete link.dataset.target;
-                    link.href = "#";
-                }
-                const registerLinkInSideMenu = sideMenu ? sideMenu.querySelector('.go-to-register') : null;
-                if (registerLinkInSideMenu) {
-                    registerLinkInSideMenu.style.display = 'block';
-                    registerLinkInSideMenu.textContent = 'Cadastrar';
-                }
             });
+        } catch (error) { 
+            console.error("Erro ao buscar vitrines:", error);
+            container.innerHTML = "<p>Não foi possível carregar as vitrines.</p>";
         }
     }
 
-    function populateMinhaConta() {
+    // =================================================================
+    // LÓGICA DE UI E NAVEGAÇÃO
+    // =================================================================
+    
+    function updateUIBasedOnLoginState() {
         if (usuarioLogado) {
-            if (userNameDisplay) userNameDisplay.textContent = usuarioLogado.nome;
-            if (userEmailDisplay) userEmailDisplay.textContent = usuarioLogado.email;
+            authLinksHeader.innerHTML = `<a href="#" data-target="minha-conta">Olá, ${usuarioLogado.nome.split(' ')[0]}</a> <a href="#" id="logout-link">Sair</a>`;
+            const loginLink = sideMenu.querySelector('.go-to-login');
+            if (loginLink) {
+                loginLink.textContent = 'Meu Painel';
+                loginLink.dataset.target = 'minha-conta';
+                loginLink.classList.remove('go-to-login');
+                loginLink.classList.add('nav-link');
+            }
+            sideMenu.querySelector('.go-to-register').style.display = 'none';
         } else {
-            showLoginScreen();
+            authLinksHeader.innerHTML = `<a href="#" class="go-to-register">Cadastrar</a> <a href="#" class="go-to-login">Entrar</a>`;
+            const contaLink = sideMenu.querySelector('[data-target="minha-conta"]');
+            if(contaLink) {
+                contaLink.textContent = 'Meu Painel / Login';
+                delete contaLink.dataset.target;
+                contaLink.classList.add('go-to-login');
+                contaLink.classList.remove('nav-link');
+            }
+            sideMenu.querySelector('.go-to-register').style.display = 'block';
         }
-    }
-
-    function showScreen(screenToShow) {
-        [mainAppScreen, loginScreen, registerScreen].forEach(s => {
-            if (s) s.classList.remove('active');
-        });
-        if (screenToShow) screenToShow.classList.add('active');
-    }
-
-    function showMainApp() { showScreen(mainAppScreen); }
-    function showLoginScreen() { showScreen(loginScreen); closeSideMenu(); }
-    function showRegisterScreen() { showScreen(registerScreen); closeSideMenu(); }
-
-    function openSideMenu() {
-        if (sideMenu) sideMenu.classList.add('open');
-        if (menuOverlay) menuOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeSideMenu() {
-        if (sideMenu) sideMenu.classList.remove('open');
-        if (menuOverlay) menuOverlay.classList.remove('active');
-        document.body.style.overflow = '';
     }
 
     function showPageContent(targetId) {
         if (!targetId) return;
-
-        if ((targetId === 'minha-conta' || targetId === 'admin-panel') && !usuarioLogado) {
+        if (targetId === 'minha-conta' && !usuarioLogado) {
             showLoginScreen();
             return;
         }
-
-        pageContents.forEach(page => {
-            if (page) {
-                page.classList.remove('active-page');
-                page.style.display = 'none';
-            }
-        });
-
+        pageContents.forEach(page => page.style.display = 'none');
         const pageToShow = document.getElementById(targetId);
-        if (pageToShow) {
-            pageToShow.classList.add('active-page');
-            pageToShow.style.display = 'block';
-        }
-        
-        pageNavLinks.forEach(link => {
-            if (link) link.classList.remove('active-nav-link');
-            if (link && link.dataset.target === targetId) {
-                link.classList.add('active-nav-link');
-            }
-        });
+        if (pageToShow) pageToShow.style.display = 'block';
 
-        if (targetId === 'minha-conta') {
-            populateMinhaConta();
-        }
-
-        const validContentPages = ['modelos', 'masculino', 'infantil', 'sobre', 'minha-conta', 'admin-panel'];
-        if (validContentPages.includes(targetId)) {
-            if (history.pushState) {
-                history.pushState({ page: targetId }, document.title, '#' + targetId);
-            } else {
-                window.location.hash = '#' + targetId;
-            }
-        }
+        if (targetId === 'home-explorar') renderizarListaDeVitrines();
+        if (targetId === 'minha-conta') populateMeuPainel();
         
         closeSideMenu();
+        showScreen(mainAppScreen);
+    }
 
-        if (targetId !== 'login-screen' && targetId !== 'register-screen') {
-            showMainApp();
+    function showScreen(screen) {
+        [mainAppScreen, loginScreen, registerScreen].forEach(s => s.classList.remove('active'));
+        screen.classList.add('active');
+    }
+    
+    function closeSideMenu() { sideMenu.classList.remove('open'); menuOverlay.classList.remove('active'); }
+    function showLoginScreen() { showScreen(loginScreen); closeSideMenu(); }
+
+    // =================================================================
+    // LÓGICA DE AUTENTICAÇÃO
+    // =================================================================
+    
+    document.getElementById('login-form-actual').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const senha = document.getElementById('login-senha').value;
+        try {
+            const response = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                usuarioLogado = data.usuario;
+                localStorage.setItem('usuarioLogadoPenicius', JSON.stringify(usuarioLogado));
+                updateUIBasedOnLoginState();
+                showPageContent('home-explorar');
+            } else { alert(`Erro: ${data.error}`); }
+        } catch (error) { alert('Erro de conexão ao fazer login.'); }
+    });
+    
+    document.getElementById('register-form-actual').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('register-nome').value;
+        const email = document.getElementById('register-email').value;
+        const senha = document.getElementById('register-senha').value;
+        try {
+            const response = await fetch('http://localhost:3000/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, email, senha }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+                showLoginScreen();
+            } else {
+                alert(`Erro: ${data.error}`);
+            }
+        } catch (error) {
+            alert('Erro de conexão ao se registrar.');
         }
-    }
-
-
-    // --- LÓGICA DE AUTENTICAÇÃO ---
-    if (registerForm) {
-        registerForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const nome = document.getElementById('register-nome').value.trim();
-            const email = document.getElementById('register-email').value.trim().toLowerCase();
-            const senha = document.getElementById('register-senha').value;
-            const confirmarSenha = document.getElementById('register-confirmar-senha').value;
-
-            if (!nome || !email || !senha || !confirmarSenha) { alert("Por favor, preencha todos os campos."); return; }
-            if (senha !== confirmarSenha) { alert("As senhas não coincidem!"); return; }
-            if (senha.length < 6) { alert("A senha deve ter pelo menos 6 caracteres."); return; }
-
-            try {
-                const response = await fetch('http://localhost:3000/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', },
-                    body: JSON.stringify({ nome, email, senha }),
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    alert(data.message);
-                    showLoginScreen();
-                    registerForm.reset();
-                } else {
-                    alert(`Erro no cadastro: ${data.error}`);
-                }
-            } catch (error) {
-                console.error('Erro ao conectar com o servidor:', error);
-                alert('Não foi possível se conectar ao servidor.');
-            }
-        });
-    }
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const senha = document.getElementById('login-senha').value;
-
-            if (!email || !senha) { alert("Por favor, preencha email e senha."); return; }
-
-            try {
-                const response = await fetch('http://localhost:3000/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', },
-                    body: JSON.stringify({ email, senha }),
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    usuarioLogado = data.usuario;
-                    localStorage.setItem('usuarioLogadoPenicius', JSON.stringify(usuarioLogado));
-                    alert(data.message);
-                    updateUIBasedOnLoginState();
-                    showPageContent('modelos');
-                    loginForm.reset();
-                } else {
-                    alert(`Erro no login: ${data.error}`);
-                    usuarioLogado = null;
-                    localStorage.removeItem('usuarioLogadoPenicius');
-                    updateUIBasedOnLoginState();
-                }
-            } catch (error) {
-                console.error('Erro ao conectar com o servidor:', error);
-                alert('Não foi possível se conectar ao servidor.');
-            }
-        });
-    }
+    });
 
     function handleLogout() {
-        if (usuarioLogado) {
-            alert(`Até logo, ${usuarioLogado.nome.split(' ')[0]}!`);
-        }
         usuarioLogado = null;
         localStorage.removeItem('usuarioLogadoPenicius');
         updateUIBasedOnLoginState();
-        showPageContent('modelos');
-        if (!mainAppScreen.classList.contains('active')) {
-            showMainApp();
+        showPageContent('home-explorar');
+        document.getElementById('product-management-panel').style.display = 'none';
+    }
+
+    // =================================================================
+    // LÓGICA DO PAINEL "MEU PAINEL"
+    // =================================================================
+    
+    const productManagementPanel = document.getElementById('product-management-panel');
+    const vitrineSelect = document.getElementById('vitrine-select');
+    const productListBody = document.getElementById('product-list-body');
+    const productForm = document.getElementById('product-form');
+
+    async function populateMeuPainel() {
+        if (!usuarioLogado) return;
+        
+        const currentUserData = await fetchAndUpdateUsuarioLogado();
+        if (!currentUserData) return; // Sai se o usuário foi deslogado
+        
+        document.getElementById('user-name-display').textContent = currentUserData.nome;
+        document.getElementById('user-email-display').textContent = currentUserData.email;
+        
+        vitrineSelect.innerHTML = '<option value="">-- Selecione uma vitrine --</option>';
+        productListBody.innerHTML = '';
+        
+        if (currentUserData.vitrines && currentUserData.vitrines.length > 0) {
+            currentUserData.vitrines.forEach(v => {
+                vitrineSelect.innerHTML += `<option value="${v._id}">${v.nome}</option>`;
+            });
+            productManagementPanel.style.display = 'block';
+        } else {
+            productManagementPanel.style.display = 'none';
         }
     }
 
-
-    // --- LÓGICA DO PAINEL DE ADMINISTRAÇÃO ---
-    async function fetchAndDisplayAdminProducts() {
-        try {
-            const response = await fetch('http://localhost:3000/api/produtos');
-            const products = await response.json();
-            productListBody.innerHTML = '';
-            products.forEach(product => {
-                const precoFormatado = Number(product.preco).toFixed(2).replace('.', ',');
-                productListBody.innerHTML += `
-                    <tr>
-                        <td>${product.nome}</td>
-                        <td>R$ ${precoFormatado}</td>
-                        <td>
-                            <button class="btn-edit" data-id="${product._id}">Editar</button>
-                            <button class="btn-delete" data-id="${product._id}">Excluir</button>
-                        </td>
-                    </tr>`;
-            });
-        } catch (error) { console.error('Erro ao buscar produtos para o admin:', error); }
-    }
-
-    async function populateFormForEdit(id) {
-        try {
-            const response = await fetch('http://localhost:3000/api/produtos');
-            const products = await response.json();
-            const product = products.find(p => p._id === id);
-            if (product) {
-                formTitle.textContent = 'Editar Produto';
-                productIdInput.value = product._id;
-                document.getElementById('product-nome').value = product.nome;
-                document.getElementById('product-descricao').value = product.descricao;
-                document.getElementById('product-preco').value = product.preco;
-                document.getElementById('product-categoria').value = product.categoria;
-                document.getElementById('product-imagem').value = product.imagem_url;
-                cancelEditBtn.style.display = 'inline-block';
-                window.scrollTo(0, adminPanel.offsetTop);
-            }
-        } catch(error) { console.error('Erro ao popular formulário:', error); }
-    }
-
-    function resetProductForm() {
-        formTitle.textContent = 'Adicionar Novo Produto';
-        productForm.reset();
-        productIdInput.value = '';
-        cancelEditBtn.style.display = 'none';
-    }
-
-    if (productForm) {
-        productForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = productIdInput.value;
-            const isEditing = !!id;
-            const productData = {
-                nome: document.getElementById('product-nome').value,
-                descricao: document.getElementById('product-descricao').value,
-                preco: document.getElementById('product-preco').value,
-                categoria: document.getElementById('product-categoria').value,
-                imagem_url: document.getElementById('product-imagem').value,
-                userId: usuarioLogado.id
-            };
-            const url = isEditing ? `http://localhost:3000/api/produtos/${id}` : 'http://localhost:3000/api/produtos';
-            const method = isEditing ? 'PUT' : 'POST';
+    vitrineSelect.addEventListener('change', fetchProductsForAdmin);
+    
+    async function fetchProductsForAdmin() {
+        const vitrineId = vitrineSelect.value;
+        productListBody.innerHTML = '';
+        if (vitrineId) {
             try {
-                const response = await fetch(url, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(productData)
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    alert(result.message);
-                    resetProductForm();
-                    fetchAndDisplayAdminProducts();
-                    renderizarProdutos();
-                } else { alert(`Erro: ${result.error}`); }
-            } catch (error) { console.error('Erro ao salvar produto:', error); }
+                const response = await fetch(`http://localhost:3000/api/vitrines/${vitrineId}/produtos`);
+                const produtos = await response.json();
+                renderAdminProductList(produtos);
+            } catch (error) { console.error('Erro ao buscar produtos:', error); }
+        }
+    }
+
+    function renderAdminProductList(produtos) {
+        productListBody.innerHTML = '';
+        produtos.forEach(p => {
+            productListBody.innerHTML += `
+                <tr data-product-id="${p._id}">
+                    <td>${p.nome}</td>
+                    <td>R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</td>
+                    <td><button class="btn-delete" data-id="${p._id}">Excluir</button></td>
+                </tr>`;
         });
     }
 
-    if (productListBody) {
-        productListBody.addEventListener('click', async (e) => {
-            const target = e.target;
-            const id = target.dataset.id;
-            if (target.classList.contains('btn-edit')) {
-                populateFormForEdit(id);
-                return;
-            }
-            if (target.classList.contains('btn-delete')) {
-                if (confirm(`Tem certeza que deseja excluir o produto ID ${id}?`)) {
-                    try {
-                        const url = `http://localhost:3000/api/produtos/${id}?userId=${usuarioLogado.id}`;
-                        const response = await fetch(url, { method: 'DELETE' });
-                        const result = await response.json();
-
-                        if (response.ok) {
-                            alert(result.message);
-                            fetchAndDisplayAdminProducts();
-                            renderizarProdutos();
-                        } else {
-                            alert(`Erro: ${result.error}`);
-                        }
-                    } catch (error) {
-                        console.error('Erro ao deletar produto:', error);
-                        alert('Ocorreu um erro de rede ao tentar deletar o produto.');
-                    }
-                }
-            }
-        });
-    }
-
-    if (cancelEditBtn) {
-        cancelEditBtn.addEventListener('click', resetProductForm);
-    }
-
-
-    // --- EVENT LISTENERS GERAIS ---
-    pageNavLinks.forEach(link => {
-        if (link.dataset.target) {
-            link.addEventListener('click', (event) => {
-                event.preventDefault();
-                const targetId = link.dataset.target;
-                showPageContent(targetId);
+    document.getElementById('create-vitrine-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('vitrine-nome').value;
+        const descricao = document.getElementById('vitrine-descricao').value;
+        try {
+            const response = await fetch('http://localhost:3000/api/vitrines', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, descricao, userId: usuarioLogado.id }),
             });
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+                await populateMeuPainel();
+                e.target.reset();
+            } else { alert(`Erro: ${data.error}`); }
+        } catch (error) { alert('Erro de conexão ao criar vitrine.'); }
+    });
+
+    productForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const vitrineId = vitrineSelect.value;
+        if (!vitrineId) { alert('Selecione uma vitrine.'); return; }
+        const productData = {
+            nome: document.getElementById('product-nome').value,
+            descricao: document.getElementById('product-descricao').value,
+            preco: document.getElementById('product-preco').value,
+            categoria: document.getElementById('product-categoria').value,
+            imagem_url: document.getElementById('product-imagem').value,
+            userId: usuarioLogado.id,
+            vitrineId: vitrineId
+        };
+        try {
+            const response = await fetch('http://localhost:3000/api/produtos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            });
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                productForm.reset();
+                await fetchProductsForAdmin();
+            } else { alert(`Erro: ${result.error}`); }
+        } catch (error) { console.error('Erro ao salvar produto:', error); }
+    });
+    
+    productListBody.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('btn-delete')) {
+            const productId = e.target.dataset.id;
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/produtos/${productId}`, { method: 'DELETE' });
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert(result.message);
+                        document.querySelector(`tr[data-product-id="${productId}"]`).remove();
+                    } else { alert(`Erro: ${result.error}`); }
+                } catch (error) { alert('Erro de conexão ao deletar produto.'); }
+            }
         }
     });
 
-    document.body.addEventListener('click', function (event) {
-        const targetElement = event.target.closest('a') || event.target.closest('button');
-        if (!targetElement) return;
+    // =================================================================
+    // EVENT LISTENERS GERAIS E INICIALIZAÇÃO
+    // =================================================================
+    
+    document.body.addEventListener('click', (e) => {
+        const target = e.target.closest('a') || e.target.closest('button');
+        if (!target) return;
 
-        if (targetElement.classList.contains('go-to-login')) { event.preventDefault(); showLoginScreen(); }
-        else if (targetElement.classList.contains('go-to-register')) { event.preventDefault(); showRegisterScreen(); }
-        else if (targetElement.id === 'my-account-link-header') { event.preventDefault(); showPageContent('minha-conta'); }
-        else if (targetElement.id === 'logout-link') { event.preventDefault(); handleLogout(); }
-        else if (targetElement.classList.contains('go-to-login-from-register')) { event.preventDefault(); showLoginScreen(); }
+        if (target.dataset.target) { e.preventDefault(); showPageContent(target.dataset.target); }
+        if (target.classList.contains('go-to-login')) { e.preventDefault(); showLoginScreen(); }
+        if (target.classList.contains('go-to-register')) { e.preventDefault(); showScreen(registerScreen); }
+        if (target.id === 'logout-link') { e.preventDefault(); handleLogout(); }
+        if (target.classList.contains('close-modal-btn')) showPageContent('home-explorar');
     });
 
-    if (btnLogoutMyAccount) { btnLogoutMyAccount.addEventListener('click', handleLogout); }
-    if (closeLoginButton) { closeLoginButton.addEventListener('click', showMainApp); }
-    if (closeRegisterButton) { closeRegisterButton.addEventListener('click', showMainApp); }
-    if (menuToggle) menuToggle.addEventListener('click', openSideMenu);
-    if (closeSideMenuBtn) closeSideMenuBtn.addEventListener('click', closeSideMenu);
-    if (menuOverlay) menuOverlay.addEventListener('click', closeSideMenu);
+    menuToggle.addEventListener('click', () => { sideMenu.classList.add('open'); menuOverlay.classList.add('active'); });
+    document.querySelector('.close-side-menu-btn').addEventListener('click', closeSideMenu);
+    menuOverlay.addEventListener('click', closeSideMenu);
+    document.getElementById('btn-logout-my-account').addEventListener('click', handleLogout);
 
-
-    // --- NAVEGAÇÃO PELO HISTÓRICO DO NAVEGADOR ---
-    window.addEventListener('popstate', (event) => {
-        let targetPage = 'modelos';
-        if (event.state && event.state.page) {
-            targetPage = event.state.page;
-        } else {
-            const hash = window.location.hash.substring(1);
-            if (hash) targetPage = hash;
+    async function initializeApp() {
+        if (usuarioLogado) {
+            await fetchAndUpdateUsuarioLogado();
         }
-        showPageContent(targetPage);
-    });
-
-    // --- INICIALIZAÇÃO DA APLICAÇÃO ---
-    function initializeApp() {
         updateUIBasedOnLoginState();
-        renderizarProdutos();
-
-        const currentHash = window.location.hash.substring(1);
-        const validPages = ['modelos', 'masculino', 'infantil', 'sobre', 'minha-conta', 'admin-panel'];
-        if (validPages.includes(currentHash)) {
-            showPageContent(currentHash);
-        } else {
-            showPageContent('modelos');
-        }
-
-        const activePageId = document.querySelector('.page-content.active-page')?.id;
-        if (activePageId) {
-            const activeLink = sideMenu?.querySelector(`.nav-link[data-target="${activePageId}"]`);
-            if (activeLink) activeLink.classList.add('active-nav-link');
-        }
+        showPageContent('home-explorar');
     }
 
     initializeApp();
