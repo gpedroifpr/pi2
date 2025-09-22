@@ -333,10 +333,6 @@ img {
 .auth-links a:hover {
     color: var(--secondary-color);
 }
-.auth-links svg {
-    width: 30px;
-    height: 30px;
-}
 
 
 /* === CONTEÚDO PRINCIPAL (MAIN) === */
@@ -412,31 +408,13 @@ img {
     margin-bottom: 10px;
     font-weight: 600;
     line-height: 1.4;
-    min-height: 3.08em; /* 1.1 * 1.4 * 2 */
 }
 .product-price {
     font-size: 1.25rem;
     color: var(--primary-color);
     font-weight: 700;
     font-family: var(--font-primary);
-    margin-bottom: 20px;
-}
-.add-to-cart-btn {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 12px 15px;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: center;
-    transition: background-color var(--transition-fast);
-    margin-top: auto;
-    text-transform: uppercase;
-}
-.add-to-cart-btn:hover {
-    background-color: var(--primary-color);
+    margin-top: auto; /* Empurra o preço para baixo */
 }
 
 
@@ -490,14 +468,27 @@ img {
 }
 
 
-/* === PAINEL DE ADMINISTRAÇÃO (REFINADO) === */
-#admin-panel.page-content {
-    max-width: 1100px;
+/* === PAINEL DE ADMINISTRAÇÃO ("MEU PAINEL") === */
+.vitrine-management-container {
+    background-color: var(--white-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-light);
+    padding: 35px;
+    margin-top: 40px;
+}
+.vitrine-management-container h2 {
+    font-size: 1.8rem;
+    font-family: var(--font-primary);
+    margin-bottom: 30px;
+}
+#product-management-panel hr {
+    margin: 40px 0;
 }
 .admin-layout {
     display: flex;
-    flex-direction: column; /* Empilha o formulário e a lista */
-    gap: 40px; /* Espaço entre os dois blocos */
+    flex-direction: column;
+    gap: 40px;
 }
 .admin-form-container, .product-list-container {
     background-color: var(--white-color);
@@ -506,7 +497,7 @@ img {
     box-shadow: var(--shadow-light);
     border: 1px solid var(--border-color);
 }
-.admin-form-container h2, .product-list-container h2 {
+.admin-form-container h3, .product-list-container h3 {
     font-size: 1.6rem;
     font-family: var(--font-primary);
     font-weight: 600;
@@ -545,18 +536,11 @@ img {
     font-size: 0.85rem;
     letter-spacing: 0.5px;
 }
-#product-list-table td:nth-child(1) {
-    font-weight: 500;
-    color: var(--primary-color);
-}
 #product-list-table td:last-child {
     text-align: right;
     white-space: nowrap;
 }
-#product-list-table tbody tr:hover {
-    background-color: rgba(93, 156, 236, 0.05);
-}
-.btn-edit, .btn-delete {
+.btn-delete {
     padding: 8px 14px;
     border: none;
     border-radius: var(--border-radius-sm);
@@ -566,13 +550,11 @@ img {
     font-weight: 600;
     text-transform: uppercase;
     transition: opacity var(--transition-fast);
-    margin-left: 8px;
+    background-color: var(--danger-color);
 }
-.btn-edit:hover, .btn-delete:hover {
+.btn-delete:hover {
     opacity: 0.85;
 }
-.btn-edit { background-color: var(--accent-color); }
-.btn-delete { background-color: var(--danger-color); }
 
 
 /* === FOOTER === */
@@ -586,37 +568,60 @@ img {
 }
 
 
-/* === RESPONSIVIDADE === */
-@media (max-width: 768px) {
-    .site-header {
-        padding: 0 15px;
-    }
-    .site-brand {
-        font-size: 1.5rem;
-    }
-    .page-content { padding: 0 15px; }
-    .page-title { font-size: 2rem; }
-    .content-grid { gap: 20px; }
-    .product-image-container { height: 250px; }
+/* === ESTILOS ADICIONAIS PARA MULTI-VITRINE === */
+.home-hero {
+    text-align: center;
+    padding: 80px 30px;
+    background-color: var(--white-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-light);
+    margin: 40px auto;
+    max-width: 900px;
 }
-@media (max-width: 480px) {
-    :root { --header-height: 60px; }
-    .header-right {
-        display: none; /* Esconde a área de login em telas muito pequenas */
-    }
-    .site-brand {
-        grid-column: 2; /* Garante que fique no meio */
-    }
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-    .login-container { padding: 30px 20px; }
-    .login-container h1 { font-size: 1.8rem; }
-    .product-name { min-height: auto; }
+.home-hero h1 {
+    font-size: 3rem;
+    font-family: var(--font-primary);
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+}
+.home-hero p {
+    font-size: 1.2rem;
+    color: var(--grey-text);
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+}
 
-    /* === ESTILOS ADICIONAIS PARA MULTI-VITRINE (ADICIONAR AO FINAL DO CSS) === */
+.segmented-control {
+    display: flex;
+    width: 100%;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    margin-top: 10px;
+}
+.segmented-control-option {
+    flex: 1;
+    padding: 12px 10px;
+    text-align: center;
+    background-color: var(--light-bg-color);
+    color: var(--grey-text);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.segmented-control-option:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+}
+.segmented-control input[type="radio"] {
+    display: none;
+}
+.segmented-control input[type="radio"]:checked + .segmented-control-option {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    font-weight: 600;
+}
 
-/* Card para a lista de vitrines na página "Explorar" */
 .vitrine-card {
     background-color: var(--white-color);
     border: 1px solid var(--border-color);
@@ -648,7 +653,6 @@ img {
     color: var(--grey-text);
 }
 
-/* Layout da página de vitrine dinâmica (vitrine.html) */
 .vitrine-layout {
     display: flex;
     gap: 30px;
@@ -657,14 +661,14 @@ img {
     padding: 40px 30px;
 }
 .side-menu-vitrine {
-    flex: 0 0 250px; /* Não cresce, não encolhe, base de 250px */
+    flex: 0 0 250px;
     background-color: var(--white-color);
     padding: 25px;
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-light);
     height: fit-content;
     position: sticky;
-    top: 100px; /* Abaixo do header */
+    top: 100px;
 }
 .side-menu-vitrine h3 {
     font-family: var(--font-primary);
@@ -672,7 +676,26 @@ img {
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border-color);
 }
-.side-menu-vitrine a {
+#vitrine-owner-info {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+.owner-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--grey-text);
+    margin-bottom: 5px;
+}
+.owner-name {
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+.owner-contact {
+    font-size: 0.9rem;
+    color: var(--accent-color);
+}
+#category-links a {
     display: block;
     padding: 10px 15px;
     color: var(--grey-text);
@@ -680,7 +703,7 @@ img {
     font-weight: 500;
     transition: all var(--transition-fast);
 }
-.side-menu-vitrine a:hover {
+#category-links a:hover {
     background-color: var(--light-bg-color);
     color: var(--primary-color);
 }
@@ -694,20 +717,24 @@ img {
     font-weight: 500;
     color: var(--grey-text);
 }
-.back-home-link:hover {
-    color: var(--primary-color);
-}
 
-/* Melhorias no painel "Minha Conta" */
-.vitrine-management-container {
-    background-color: #fff;
-    padding: 30px;
-    margin-top: 30px;
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-light);
-}
 
-#product-management-panel hr {
-    margin: 40px 0;
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+    .site-header { padding: 0 15px; }
+    .site-brand { font-size: 1.5rem; }
+    .page-content { padding: 0 15px; }
+    .page-title { font-size: 2rem; }
+    .content-grid { gap: 20px; }
+    .product-image-container { height: 250px; }
+    .home-hero h1 { font-size: 2.2rem; }
+    .vitrine-layout { flex-direction: column; }
+    .side-menu-vitrine { position: static; width: 100%; }
 }
+@media (max-width: 480px) {
+    :root { --header-height: 60px; }
+    .header-right { display: none; }
+    .site-brand { grid-column: 2; }
+    .content-grid { grid-template-columns: 1fr; }
+    .login-container { padding: 30px 20px; }
 }
