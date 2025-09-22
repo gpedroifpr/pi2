@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitrine Chic - Explore e crie sua vitrine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lato:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="menu-overlay"></div>
+    <nav class="side-menu" id="sideMenu">
+        <button class="close-side-menu-btn" aria-label="Fechar Menu Lateral">×</button>
+        <a href="#home" class="side-menu-link nav-link" data-target="home">Home</a>
+        <a href="#explorar" class="side-menu-link nav-link" data-target="explorar">Explorar Vitrines</a>
+        <a href="#sobre" class="side-menu-link nav-link" data-target="sobre">Sobre Nós</a>
+        <hr>
+        <a href="#" class="side-menu-link go-to-login">Meu Painel / Login</a>
+        <a href="#" class="side-menu-link go-to-register">Cadastrar</a>
+    </nav>
+
+    <div id="login-screen" class="screen">
+        <div class="login-container">
+            <div class="login-container-content">
+                <h1>Login</h1>
+                <form id="login-form-actual">
+                    <div class="form-group"><label for="login-email">Email:</label><input type="email" id="login-email" required></div>
+                    <div class="form-group"><label for="login-senha">Senha:</label><input type="password" id="login-senha" required></div>
+                    <button type="submit" class="btn-primary">Entrar</button>
+                </form>
+                <p class="form-switch-link">Não tem uma conta? <a href="#" class="go-to-register">Cadastre-se</a></p>
+                <button class="close-modal-btn" aria-label="Fechar Login">×</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="register-screen" class="screen">
+        <div class="login-container register-container">
+            <div class="login-container-content">
+                <h1>Cadastre-se</h1>
+                <form id="register-form-actual">
+                    <div class="form-group"><label for="register-nome">Nome:</label><input type="text" id="register-nome" required></div>
+                    <div class="form-group"><label for="register-email">Email:</label><input type="email" id="register-email" required></div>
+                    <div class="form-group"><label for="register-senha">Senha:</label><input type="password" id="register-senha" required></div>
+                    <div class="form-group">
+                        <label>Qual o seu objetivo?</label>
+                        <div class="segmented-control">
+                            <input type="radio" id="tipoCliente" name="tipoConta" value="cliente" checked>
+                            <label for="tipoCliente" class="segmented-control-option">Apenas navegar</label>
+                            <input type="radio" id="tipoVitrinista" name="tipoConta" value="vitrinista">
+                            <label for="tipoVitrinista" class="segmented-control-option">Criar minha vitrine</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Cadastrar</button>
+                </form>
+                <p class="form-switch-link">Já tem uma conta? <a href="#" class="go-to-login-from-register">Faça Login</a></p>
+                <button class="close-modal-btn" aria-label="Fechar Cadastro">×</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="main-app" class="screen active">
+        <header class="site-header">
+            <div class="header-left"><button class="menu-toggle" id="menuToggle" aria-label="Abrir menu"><span class="hamburger-icon"></span></button></div>
+            <div class="site-brand">Vitrine Chic</div>
+            <div class="header-right"><div class="auth-links"></div></div>
+        </header>
+
+        <main class="site-main-content">
+            <section id="home" class="page-content">
+                <div class="home-hero">
+                    <h1>Sua Vitrine, Seu Estilo</h1>
+                    <p>Crie e explore vitrines de moda únicas. Encontre peças incríveis ou mostre ao mundo o seu talento.</p>
+                    <a href="#explorar" class="btn-primary nav-link" data-target="explorar">Comece a Explorar</a>
+                </div>
+            </section>
+
+            <section id="explorar" class="page-content">
+                <h1 class="page-title">Vitrines em Destaque</h1>
+                <div class="content-grid" id="grid-vitrines"></div>
+            </section>
+            
+            <section id="sobre" class="page-content">
+                <h1 class="page-title">Sobre Nós</h1>
+                <div class="about-container">
+                    <p class="about-text">Bem-vindo à Vitrine Chic! Somos apaixonados por moda e dedicados a oferecer as últimas tendências com qualidade e estilo para todos os públicos. Nossa missão é proporcionar uma experiência de compra única, com peças que expressam individualidade e conforto. Desde o início, buscamos inovar e trazer o melhor do mundo da moda para você, seja para o dia a dia, ocasiões especiais ou para os pequenos. Explore nossas coleções e descubra o look perfeito que combina com você!</p>
+                </div>
+            </section>
+
+            <section id="minha-conta" class="page-content">
+                <h1 class="page-title">Meu Painel de Controle</h1>
+                <div class="user-details-container">
+                    <h2>Detalhes do Usuário</h2>
+                    <div class="user-info-group">
+                        <p><strong>Nome:</strong> <span id="user-name-display">...</span></p>
+                        <p><strong>Email:</strong> <span id="user-email-display">...</span></p>
+                    </div>
+                    <button id="btn-logout-my-account" class="btn-danger">Sair da Conta</button>
+                </div>
+
+                <div class="vitrine-management-container" style="display: none;">
+                    <h2>Minhas Vitrines</h2>
+                    <div id="user-vitrines-list"></div>
+                    <div class="admin-form-container">
+                        <h3>Criar Nova Vitrine</h3>
+                        <form id="create-vitrine-form">
+                            <div class="form-group"><label for="vitrine-nome">Nome da Vitrine</label><input type="text" id="vitrine-nome" required></div>
+                            <div class="form-group"><label for="vitrine-descricao">Descrição Curta</label><input type="text" id="vitrine-descricao"></div>
+                            <button type="submit" class="btn-primary">Criar Vitrine</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="product-management-panel" class="page-content" style="display: none;">
+                    <hr>
+                    <h2>Gerenciar Produtos</h2>
+                    <div class="form-group">
+                        <label for="vitrine-select">Gerenciar produtos da vitrine:</label>
+                        <select id="vitrine-select"></select>
+                    </div>
+                    
+                    <div class="admin-layout">
+                        <div class="admin-form-container">
+                            <h3 id="form-title">Adicionar Novo Produto</h3>
+                            <form id="product-form">
+                                <div class="form-group"><label for="product-nome">Nome do Produto</label><input type="text" id="product-nome" required></div>
+                                <div class="form-group"><label for="product-descricao">Descrição</label><textarea id="product-descricao" rows="4"></textarea></div>
+                                <div class="form-group"><label for="product-preco">Preço (R$)</label><input type="number" step="0.01" id="product-preco" required></div>
+                                <div class="form-group"><label for="product-categoria">Categoria</label><input type="text" id="product-categoria" placeholder="Ex: Camisetas, Calçados" required></div>
+                                <div class="form-group"><label for="product-imagem">URL da Imagem</label><input type="text" id="product-imagem"></div>
+                                <div class="form-actions"><button type="submit" class="btn-primary">Salvar Produto</button></div>
+                            </form>
+                        </div>
+                        <div class="product-list-container">
+                            <h3>Produtos Cadastrados</h3>
+                            <div class="table-wrapper">
+                                <table id="product-list-table">
+                                    <thead><tr><th>Nome</th><th>Preço</th><th>Ações</th></tr></thead>
+                                    <tbody id="product-list-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer class="site-footer"><p>© 2024 Vitrine Chic. Todos os direitos reservados.</p></footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 // backend/server.js (VERSÃO FINAL E COMPLETA)
-
+const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,7 +10,7 @@ const PORT = 3000;
 const saltRounds = 10;
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const MONGO_URI = "mongodb+srv://gpedroifpr:PedroSamara123@penicius.s0ji1as.mongodb.net/penicius_db?retryWrites=true&w=majority&appName=penicius";
 mongoose.connect(MONGO_URI).then(() => console.log("Conectado ao MongoDB Atlas!")).catch(err => console.error("Erro ao conectar:", err));
@@ -129,12 +129,13 @@ app.post('/api/vitrines', async (req, res) => {
     }
 });
 
-app.post('/api/produtos', isVitrineOwner, async (req, res) => {
+app.post('/api/produtos', async (req, res) => {
     try {
-        const { nome, descricao, preco, categoria, imagem_url, vitrineId } = req.body;
+        const { nome, descricao, preco, categoria, imagem_url, userId, vitrineId } = req.body;
         const novoProduto = new Produto({ nome, descricao, preco, categoria, imagem_url, vitrine: vitrineId });
         await novoProduto.save();
         res.status(201).json({ message: 'Produto criado com sucesso!', produto: novoProduto });
+        console.log("Recebida requisição de registro com o corpo:Retorno 201", req.body);
     } catch (error) { res.status(500).json({ error: "Erro ao criar produto" }); }
 });
 
