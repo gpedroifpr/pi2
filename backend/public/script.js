@@ -209,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const nome = document.getElementById('vitrine-nome').value;
         const descricao = document.getElementById('vitrine-descricao').value;
         try {
-            if(usuarioLogado.role === 'admin'){
             const response = await fetch('http://localhost:3000/api/vitrines', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome, descricao, userId: usuarioLogado.id }), });
             const data = await response.json();
             if (response.ok) {
@@ -217,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 await populateMeuPainel();
                 e.target.reset();
             } else { alert(`Erro: ${data.error}`); }
-        } else{alert('Usuário Não permitido')};
         } catch (error) { alert('Erro de conexão ao criar vitrine.'); }
     });
 
@@ -236,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
             vitrineId: vitrineId
         };
         try {
-            if(usuarioLogado.role === 'admin'){
             console.log('inicio da api');
             console.log(usuarioLogado.role)
             const response = await fetch('http://localhost:3000/api/produtos', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productData) });
@@ -247,8 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(result.message);
                 document.getElementById('product-form').reset();
                 await fetchProductsForAdmin(vitrineId);
-            } else { console.log(`Erro ao criar produto: ${result.error || 'Erro desconhecido.'}`); }}
-            else{alert('Usuário Não permitido')};
+            } else { console.log(`Erro ao criar produto: ${result.error || 'Erro desconhecido.'}`); }
         } catch (error) { console.log('Falha de conexão ao salvar produto.'); }
     });
     
