@@ -174,12 +174,7 @@ app.delete('/api/produtos/:id', async (req, res) => {
 });
 
 // Esta parte serve o frontend para qualquer outra rota
-// app.get(/^\/(?!api).*/, (req, res) => {
-//     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-// });
-// app.listen(PORT, () => { console.log(`Servidor rodando na porta ${PORT}`); });
-
-// Rota para servir a página inicial
-app.get('/', (req, res) => {
+app.get(/^\/(?!api).*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+app.listen(PORT, () => { console.log(`Servidor rodando na porta ${PORT}`); });
