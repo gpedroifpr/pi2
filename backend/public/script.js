@@ -158,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const vitrineManagementContainer = document.querySelector('.vitrine-management-container');
         const productManagementPanel = document.getElementById('product-management-panel');
         const vitrineSelect = document.getElementById('vitrine-select');
-        const productListBody = document.getElementById('product-list-body');
         
         document.getElementById('user-name-display').textContent = currentUserData.nome;
         document.getElementById('user-email-display').textContent = currentUserData.email;
@@ -166,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentUserData.tipoConta === 'vitrinista') {
             vitrineManagementContainer.style.display = 'block';
             vitrineSelect.innerHTML = '<option value="">-- Selecione uma vitrine --</option>';
-            productListBody.innerHTML = '';
             
             if (currentUserData.vitrines && currentUserData.vitrines.length > 0) {
                 currentUserData.vitrines.forEach(v => {
@@ -184,15 +182,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('vitrine-select').addEventListener('change', (e) => fetchProductsForAdmin(e.target.value));
     
+    // <-- FUNÇÃO ATUALIZADA PARA MOSTRAR/ESCONDER A LISTA
     async function fetchProductsForAdmin(vitrineId) {
+        const productListContainer = document.querySelector('.product-list-container');
         const productListBody = document.getElementById('product-list-body');
         productListBody.innerHTML = '';
-        if (vitrineId) {
-            try {
-                const response = await fetch(`http://localhost:3000/api/vitrines/${vitrineId}/produtos`);
-                const produtos = await response.json();
-                renderAdminProductList(produtos);
-            } catch (error) { console.error('Erro ao buscar produtos:', error); }
+
+        if (!vitrineId) {
+            productListContainer.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/vitrines/${vitrineId}/produtos`);
+            const produtos = await response.json();
+            renderAdminProductList(produtos);
+            
+            productListContainer.style.display = produtos.length > 0 ? 'block' : 'none';
+        } catch (error) {
+            console.error('Erro ao buscar produtos:', error);
+            productListContainer.style.display = 'none';
         }
     }
 
@@ -234,32 +243,37 @@ document.addEventListener('DOMContentLoaded', () => {
             vitrineId: vitrineId
         };
         try {
-            console.log('inicio da api');
-            console.log(usuarioLogado.role)
             const response = await fetch('http://localhost:3000/api/produtos', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productData) });
-            console.log('busca da api');
             const result = await response.json();
-            console.log('resultado da api');
             if (response.ok) {
                 alert(result.message);
                 document.getElementById('product-form').reset();
                 await fetchProductsForAdmin(vitrineId);
-            } else { console.log(`Erro ao criar produto: ${result.error || 'Erro desconhecido.'}`); }
-        } catch (error) { console.log('Falha de conexão ao salvar produto.'); }
+            } else { alert(`Erro ao criar produto: ${result.error || 'Erro desconhecido.'}`); }
+        } catch (error) { alert('Falha de conexão ao salvar produto.'); }
     });
     
+    // <-- CÓDIGO ATUALIZADO PARA ENVIAR O USERID AO DELETAR
     document.getElementById('product-list-body').addEventListener('click', async (e) => {
         if (e.target.classList.contains('btn-delete')) {
             const productId = e.target.dataset.id;
-            if (confirm('Tem certeza?')) {
+            if (confirm('Tem certeza que deseja apagar este produto?')) {
                 try {
-                    const response = await fetch(`http://localhost:3000/api/produtos/${productId}`, { method: 'DELETE' });
+                    const response = await fetch(`http://localhost:3000/api/produtos/${productId}`, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: usuarioLogado.id })
+                    });
                     const result = await response.json();
                     if (response.ok) {
                         alert(result.message);
                         document.querySelector(`tr[data-product-id="${productId}"]`).remove();
-                    } else { alert(`Erro: ${result.error}`); }
-                } catch (error) { alert('Erro de conexão ao deletar produto.'); }
+                    } else {
+                        alert(`Erro: ${result.error}`);
+                    }
+                } catch (error) {
+                    alert('Erro de conexão ao deletar produto.');
+                }
             }
         }
     });

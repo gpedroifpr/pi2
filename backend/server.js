@@ -32,30 +32,78 @@ const Vitrine = mongoose.model('Vitrine', VitrineSchema);
 const ProdutoSchema = new mongoose.Schema({ nome: { type: String, required: true }, descricao: String, preco: { type: Number, required: true }, categoria: { type: String, required: true }, imagem_url: String, vitrine: { type: mongoose.Schema.Types.ObjectId, ref: 'Vitrine', required: true } });
 const Produto = mongoose.model('Produto', ProdutoSchema);
 
-// MIDDLEWARE (sem alterações)
-const isVitrineOwner = async (req, res, next) => { /* ... */ };
+
+// MIDDLEWARES DE SEGURANÇA
+const isVitrineOwner = async (req, res, next) => {
+    console.log("\n[MIDDLEWARE] Verificando permissão para criar produto...");
+    try {
+        const { userId, vitrineId } = req.body;
+
+        if (!userId || !vitrineId) {
+            console.log("[MIDDLEWARE] -> REJEITADO: Faltando userId ou vitrineId.");
+            return res.status(401).json({ error: 'Dados de autenticação insuficientes (userId ou vitrineId faltando).' });
+        }
+
+        const vitrine = await Vitrine.findById(vitrineId);
+        if (!vitrine) {
+            console.log(`[MIDDLEWARE] -> REJEITADO: Vitrine com ID '${vitrineId}' não encontrada.`);
+            return res.status(404).json({ error: 'Vitrine não encontrada.' });
+        }
+        
+        if (vitrine.dono.toString() !== userId) {
+            console.log(`[MIDDLEWARE] -> REJEITADO: Permissão negada. Dono é '${vitrine.dono.toString()}', mas usuário é '${userId}'.`);
+            return res.status(403).json({ error: 'Acesso negado: você não é o dono desta vitrine.' });
+        }
+        
+        console.log("[MIDDLEWARE] -> APROVADO: Usuário é o dono. Prosseguindo...");
+        next();
+    } catch (error) {
+        console.error("[MIDDLEWARE] -> ERRO CRÍTICO:", error);
+        return res.status(500).json({ error: 'Erro interno no servidor ao verificar permissões.' });
+    }
+};
+
+// <-- NOVO MIDDLEWARE DE SEGURANÇA VAI AQUI
+const canDeleteProduct = async (req, res, next) => {
+    try {
+        const { userId } = req.body;
+        const { id: productId } = req.params;
+
+        if (!userId) {
+            return res.status(401).json({ error: 'ID do usuário não fornecido para autorização.' });
+        }
+        const product = await Produto.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: 'Produto não encontrado.' });
+        }
+        const vitrine = await Vitrine.findById(product.vitrine);
+        if (!vitrine) {
+            return res.status(404).json({ error: 'Vitrine associada não encontrada.' });
+        }
+        if (vitrine.dono.toString() !== userId) {
+            return res.status(403).json({ error: 'Acesso negado: você não é o dono desta vitrine.' });
+        }
+        next();
+    } catch (error) {
+        console.error("Erro no middleware de exclusão:", error);
+        res.status(500).json({ error: 'Erro interno ao verificar permissões de exclusão.' });
+    }
+};
+
 
 // ROTAS
 app.post('/api/register', async (req, res) => {
-    // Vamos verificar o que está chegando do frontend
     console.log("Recebida requisição de registro com o corpo:", req.body);
-
     const { nome, email, senha, tipoConta } = req.body;
-
-    // Validação robusta
     if (!nome || !email || !senha || !tipoConta) {
-        console.log("Erro de validação: Campo obrigatório faltando.");
         return res.status(400).json({ error: "Todos os campos são obrigatórios." });
     }
-
     try {
         const hash = await bcrypt.hash(senha, saltRounds);
         const novoUsuario = new Usuario({ nome, email, senha: hash, tipoConta });
         await novoUsuario.save();
-        console.log("Usuário salvo com sucesso:", novoUsuario);
         res.status(201).json({ message: "Usuário cadastrado com sucesso!" });
     } catch (err) {
-        console.error("Erro ao salvar usuário:", err);
         if (err.code === 11000) {
             return res.status(400).json({ error: "Este email já está cadastrado." });
         }
@@ -129,22 +177,26 @@ app.post('/api/vitrines', async (req, res) => {
     }
 });
 
-app.post('/api/produtos', async (req, res) => {
+app.post('/api/produtos', isVitrineOwner, async (req, res) => { // <-- Middleware de segurança adicionado aqui também!
     try {
-        const { nome, descricao, preco, categoria, imagem_url, userId, vitrineId } = req.body;
+        const { nome, descricao, preco, categoria, imagem_url, vitrineId } = req.body;
         const novoProduto = new Produto({ nome, descricao, preco, categoria, imagem_url, vitrine: vitrineId });
         await novoProduto.save();
         res.status(201).json({ message: 'Produto criado com sucesso!', produto: novoProduto });
-        console.log("Recebida requisição de registro com o corpo:Retorno 201", req.body);
     } catch (error) { res.status(500).json({ error: "Erro ao criar produto" }); }
 });
 
-app.delete('/api/produtos/:id', async (req, res) => {
+// <-- ROTA DELETE ATUALIZADA COM O MIDDLEWARE
+app.delete('/api/produtos/:id', canDeleteProduct, async (req, res) => {
     try {
         const result = await Produto.findByIdAndDelete(req.params.id);
         if (result) res.json({ message: 'Produto deletado com sucesso!' });
         else res.status(404).json({ error: "Produto não encontrado" });
     } catch (error) { res.status(500).json({ error: "Erro ao deletar produto" }); }
+});
+
+app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => { console.log(`Servidor rodando na porta ${PORT}`); });
