@@ -1,4 +1,4 @@
-// backend/server.js (VERSÃO FINAL E COMPLETA)
+// backend/server.js (VERSÃO FINAL CORRIGIDA)
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -8,8 +8,13 @@ const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 3000;
 const saltRounds = 10;
-app.use(express.json());
+
+// MIDDLEWARES GERAIS
 app.use(cors());
+app.use(express.json());
+
+// Servir arquivos estáticos (HTML, CSS, JS, IMAGENS) da pasta 'public'
+// Esta linha é a mais importante para que as imagens e o CSS funcionem.
 app.use(express.static(path.join(__dirname, 'public')));
 
 const MONGO_URI = "mongodb+srv://gpedroifpr:PedroSamara123@penicius.s0ji1as.mongodb.net/penicius_db?retryWrites=true&w=majority&appName=penicius";
@@ -35,40 +40,28 @@ const Produto = mongoose.model('Produto', ProdutoSchema);
 
 // MIDDLEWARES DE SEGURANÇA
 const isVitrineOwner = async (req, res, next) => {
-    console.log("\n[MIDDLEWARE] Verificando permissão para criar produto...");
     try {
         const { userId, vitrineId } = req.body;
-
         if (!userId || !vitrineId) {
-            console.log("[MIDDLEWARE] -> REJEITADO: Faltando userId ou vitrineId.");
             return res.status(401).json({ error: 'Dados de autenticação insuficientes (userId ou vitrineId faltando).' });
         }
-
         const vitrine = await Vitrine.findById(vitrineId);
         if (!vitrine) {
-            console.log(`[MIDDLEWARE] -> REJEITADO: Vitrine com ID '${vitrineId}' não encontrada.`);
             return res.status(404).json({ error: 'Vitrine não encontrada.' });
         }
-        
         if (vitrine.dono.toString() !== userId) {
-            console.log(`[MIDDLEWARE] -> REJEITADO: Permissão negada. Dono é '${vitrine.dono.toString()}', mas usuário é '${userId}'.`);
             return res.status(403).json({ error: 'Acesso negado: você não é o dono desta vitrine.' });
         }
-        
-        console.log("[MIDDLEWARE] -> APROVADO: Usuário é o dono. Prosseguindo...");
         next();
     } catch (error) {
-        console.error("[MIDDLEWARE] -> ERRO CRÍTICO:", error);
         return res.status(500).json({ error: 'Erro interno no servidor ao verificar permissões.' });
     }
 };
 
-// <-- NOVO MIDDLEWARE DE SEGURANÇA VAI AQUI
 const canDeleteProduct = async (req, res, next) => {
     try {
         const { userId } = req.body;
         const { id: productId } = req.params;
-
         if (!userId) {
             return res.status(401).json({ error: 'ID do usuário não fornecido para autorização.' });
         }
@@ -85,15 +78,13 @@ const canDeleteProduct = async (req, res, next) => {
         }
         next();
     } catch (error) {
-        console.error("Erro no middleware de exclusão:", error);
         res.status(500).json({ error: 'Erro interno ao verificar permissões de exclusão.' });
     }
 };
 
 
-// ROTAS
+// ROTAS DE API (todas começam com /api)
 app.post('/api/register', async (req, res) => {
-    console.log("Recebida requisição de registro com o corpo:", req.body);
     const { nome, email, senha, tipoConta } = req.body;
     if (!nome || !email || !senha || !tipoConta) {
         return res.status(400).json({ error: "Todos os campos são obrigatórios." });
@@ -177,7 +168,7 @@ app.post('/api/vitrines', async (req, res) => {
     }
 });
 
-app.post('/api/produtos', isVitrineOwner, async (req, res) => { // <-- Middleware de segurança adicionado aqui também!
+app.post('/api/produtos', isVitrineOwner, async (req, res) => {
     try {
         const { nome, descricao, preco, categoria, imagem_url, vitrineId } = req.body;
         const novoProduto = new Produto({ nome, descricao, preco, categoria, imagem_url, vitrine: vitrineId });
@@ -186,7 +177,6 @@ app.post('/api/produtos', isVitrineOwner, async (req, res) => { // <-- Middlewar
     } catch (error) { res.status(500).json({ error: "Erro ao criar produto" }); }
 });
 
-// <-- ROTA DELETE ATUALIZADA COM O MIDDLEWARE
 app.delete('/api/produtos/:id', canDeleteProduct, async (req, res) => {
     try {
         const result = await Produto.findByIdAndDelete(req.params.id);
@@ -195,8 +185,12 @@ app.delete('/api/produtos/:id', canDeleteProduct, async (req, res) => {
     } catch (error) { res.status(500).json({ error: "Erro ao deletar produto" }); }
 });
 
+
+// ROTA CATCH-ALL (Pega tudo que NÃO é um arquivo na pasta public e NÃO é uma API)
+// Esta rota DEVE VIR POR ÚLTIMO.
 app.get(/^\/(?!api).*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
 
 app.listen(PORT, () => { console.log(`Servidor rodando na porta ${PORT}`); });
