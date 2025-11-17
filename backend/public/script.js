@@ -1,7 +1,7 @@
-// script.js (VERSÃO FINAL E CORRETA - SUBSTITUA TUDO)
+// script.js (VERSÃO FINAL COM FUNCIONALIDADE DE EDIÇÃO)
 
 document.addEventListener('DOMContentLoaded', () => {
-    // SELETORES GLOBAIS
+    // SELETORES GERAIS
     const mainAppScreen = document.getElementById('main-app');
     const loginScreen = document.getElementById('login-screen');
     const registerScreen = document.getElementById('register-screen');
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ESTADO DA APLICAÇÃO
     let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogadoPenicius')) || null;
+    let currentProductList = []; // !!!!! NOVO !!!!! -> Guarda a lista de produtos atual
     
     // =================================================================
     // FUNÇÕES DE BUSCA DE DADOS
@@ -178,15 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
             vitrineManagementContainer.style.display = 'none';
             productManagementPanel.style.display = 'none';
         }
+        resetProductForm();
     }
 
-    document.getElementById('vitrine-select').addEventListener('change', (e) => fetchProductsForAdmin(e.target.value));
+    document.getElementById('vitrine-select').addEventListener('change', (e) => {
+        resetProductForm();
+        fetchProductsForAdmin(e.target.value);
+    });
     
-    // <-- FUNÇÃO ATUALIZADA PARA MOSTRAR/ESCONDER A LISTA
     async function fetchProductsForAdmin(vitrineId) {
         const productListContainer = document.querySelector('.product-list-container');
         const productListBody = document.getElementById('product-list-body');
         productListBody.innerHTML = '';
+        currentProductList = []; // Limpa a lista antiga
 
         if (!vitrineId) {
             productListContainer.style.display = 'none';
@@ -196,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`http://localhost:3000/api/vitrines/${vitrineId}/produtos`);
             const produtos = await response.json();
+            currentProductList = produtos; // Salva a lista de produtos atual
             renderAdminProductList(produtos);
             
             productListContainer.style.display = produtos.length > 0 ? 'block' : 'none';
@@ -209,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const productListBody = document.getElementById('product-list-body');
         productListBody.innerHTML = '';
         produtos.forEach(p => {
-            productListBody.innerHTML += `<tr data-product-id="${p._id}"><td>${p.nome}</td><td>R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</td><td><button class="btn-delete" data-id="${p._id}">Excluir</button></td></tr>`;
+            productListBody.innerHTML += `<tr data-product-id="${p._id}"><td>${p.nome}</td><td>R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</td><td><button class="btn-edit" data-id="${p._id}">Editar</button><button class="btn-delete" data-id="${p._id}">Excluir</button></td></tr>`;
         });
     }
 
@@ -228,35 +234,53 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { alert('Erro de conexão ao criar vitrine.'); }
     });
 
-    document.getElementById('product-form').addEventListener('submit', async (e) => {
+    // !!!!! LÓGICA DE EDIÇÃO/CRIAÇÃO DE PRODUTO ATUALIZADA !!!!!
+    const productForm = document.getElementById('product-form');
+    productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const vitrineSelect = document.getElementById('vitrine-select');
-        const vitrineId = vitrineSelect.value;
+        const vitrineId = document.getElementById('vitrine-select').value;
         if (!vitrineId) { alert('Selecione uma vitrine.'); return; }
+
         const productData = {
             nome: document.getElementById('product-nome').value,
             descricao: document.getElementById('product-descricao').value,
-            preco: document.getElementById('product-preco').value,
+            preco: parseFloat(document.getElementById('product-preco').value),
             categoria: document.getElementById('product-categoria').value,
             imagem_url: document.getElementById('product-imagem').value,
-            userId: usuarioLogado.id,
-            vitrineId: vitrineId
+            userId: usuarioLogado.id
         };
+
+        const editingId = e.target.dataset.editingId;
+        const isEditing = !!editingId;
+
+        const url = isEditing ? `http://localhost:3000/api/produtos/${editingId}` : 'http://localhost:3000/api/produtos';
+        const method = isEditing ? 'PUT' : 'POST';
+        if (!isEditing) {
+            productData.vitrineId = vitrineId; // Apenas envie vitrineId na criação
+        }
+
         try {
-            const response = await fetch('http://localhost:3000/api/produtos', {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productData) });
+            const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(productData) });
             const result = await response.json();
+            
             if (response.ok) {
                 alert(result.message);
-                document.getElementById('product-form').reset();
+                resetProductForm();
                 await fetchProductsForAdmin(vitrineId);
-            } else { alert(`Erro ao criar produto: ${result.error || 'Erro desconhecido.'}`); }
-        } catch (error) { alert('Falha de conexão ao salvar produto.'); }
+            } else {
+                alert(`Erro: ${result.error || 'Erro desconhecido.'}`);
+            }
+        } catch (error) {
+            alert('Falha de conexão ao salvar produto.');
+        }
     });
-    
-    // <-- CÓDIGO ATUALIZADO PARA ENVIAR O USERID AO DELETAR
+
+    // !!!!! LÓGICA DE CLIQUE NA LISTA DE PRODUTOS ATUALIZADA !!!!!
     document.getElementById('product-list-body').addEventListener('click', async (e) => {
-        if (e.target.classList.contains('btn-delete')) {
-            const productId = e.target.dataset.id;
+        const target = e.target;
+        const productId = target.dataset.id;
+
+        if (target.classList.contains('btn-delete')) {
             if (confirm('Tem certeza que deseja apagar este produto?')) {
                 try {
                     const response = await fetch(`http://localhost:3000/api/produtos/${productId}`, {
@@ -275,8 +299,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Erro de conexão ao deletar produto.');
                 }
             }
+        } else if (target.classList.contains('btn-edit')) {
+            const productToEdit = currentProductList.find(p => p._id === productId);
+            if (productToEdit) {
+                // Preencher o formulário
+                document.getElementById('product-nome').value = productToEdit.nome;
+                document.getElementById('product-descricao').value = productToEdit.descricao || '';
+                document.getElementById('product-preco').value = productToEdit.preco;
+                document.getElementById('product-categoria').value = productToEdit.categoria;
+                document.getElementById('product-imagem').value = productToEdit.imagem_url || '';
+
+                // Mudar para o modo de edição
+                document.getElementById('form-title').textContent = 'Editar Produto';
+                document.getElementById('product-submit-button').textContent = 'Atualizar Produto';
+                document.getElementById('product-cancel-button').style.display = 'inline-block';
+                productForm.dataset.editingId = productId;
+                
+                // Rolar a tela até o formulário para melhor experiência do usuário
+                productForm.scrollIntoView({ behavior: 'smooth' });
+            }
         }
     });
+
+    // !!!!! NOVA FUNÇÃO PARA RESETAR O FORMULÁRIO !!!!!
+    function resetProductForm() {
+        productForm.reset();
+        document.getElementById('form-title').textContent = 'Adicionar Novo Produto';
+        document.getElementById('product-submit-button').textContent = 'Salvar Produto';
+        document.getElementById('product-cancel-button').style.display = 'none';
+        productForm.dataset.editingId = '';
+    }
+    
+    document.getElementById('product-cancel-button').addEventListener('click', resetProductForm);
+
 
     // =================================================================
     // EVENT LISTENERS GERAIS E INICIALIZAÇÃO
@@ -288,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.dataset.target) { e.preventDefault(); showPageContent(target.dataset.target); }
         if (target.classList.contains('go-to-login')) { e.preventDefault(); showLoginScreen(); }
         if (target.classList.contains('go-to-register')) { e.preventDefault(); showScreen(registerScreen); }
-        if (target.id === 'logout-link') { e.preventDefault(); handleLogout(); }
+        if (target.id === 'logout-link' || target.id === 'btn-logout-my-account') { e.preventDefault(); handleLogout(); }
         if (target.classList.contains('close-modal-btn')) { e.preventDefault(); showPageContent('home'); }
         if (target.classList.contains('go-to-login-from-register')) { e.preventDefault(); showLoginScreen(); }
     });

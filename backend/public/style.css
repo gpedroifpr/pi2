@@ -622,6 +622,25 @@ img {
 
 #product-list-table td:last-child {
     text-align: right;
+    white-space: nowrap; /* !!!!! ALTERAÇÃO AQUI !!!!! -> Garante que os botões não quebrem a linha */
+}
+
+/* !!!!! ALTERAÇÃO AQUI !!!!! -> Adicionado estilo para o novo botão de Editar */
+.btn-edit {
+    padding: 8px 14px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    color: white;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background-color: var(--accent-color); /* Cor azul do Design System */
+    margin-right: 8px; /* Cria um espaço entre os botões Editar e Excluir */
+}
+
+.btn-edit:hover {
+    opacity: 0.85;
 }
 
 .btn-delete {

@@ -1,4 +1,4 @@
-// backend/server.js (VERSÃO FINAL CORRIGIDA)
+// backend/server.js (VERSÃO FINAL CORRIGIDA E COM EDIÇÃO)
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -14,7 +14,6 @@ app.use(cors());
 app.use(express.json());
 
 // Servir arquivos estáticos (HTML, CSS, JS, IMAGENS) da pasta 'public'
-// Esta linha é a mais importante para que as imagens e o CSS funcionem.
 app.use(express.static(path.join(__dirname, 'public')));
 
 const MONGO_URI = "mongodb+srv://gpedroifpr:PedroSamara123@penicius.s0ji1as.mongodb.net/penicius_db?retryWrites=true&w=majority&appName=penicius";
@@ -79,6 +78,29 @@ const canDeleteProduct = async (req, res, next) => {
         next();
     } catch (error) {
         res.status(500).json({ error: 'Erro interno ao verificar permissões de exclusão.' });
+    }
+};
+
+// !!!!! NOVO MIDDLEWARE DE SEGURANÇA PARA EDIÇÃO !!!!!
+const canEditProduct = async (req, res, next) => {
+    try {
+        const { userId } = req.body; // O ID do usuário vem no corpo da requisição
+        const { id: productId } = req.params; // O ID do produto vem na URL
+
+        if (!userId) return res.status(401).json({ error: 'ID do usuário não fornecido para autorização.' });
+        
+        const product = await Produto.findById(productId);
+        if (!product) return res.status(404).json({ error: 'Produto não encontrado.' });
+
+        const vitrine = await Vitrine.findById(product.vitrine);
+        if (!vitrine) return res.status(404).json({ error: 'Vitrine associada ao produto não encontrada.' });
+        
+        if (vitrine.dono.toString() !== userId) {
+            return res.status(403).json({ error: 'Acesso negado: você não tem permissão para editar este produto.' });
+        }
+        next();
+    } catch (error) {
+        res.status(500).json({ error: 'Erro interno ao verificar permissões de edição.' });
     }
 };
 
@@ -177,6 +199,25 @@ app.post('/api/produtos', isVitrineOwner, async (req, res) => {
     } catch (error) { res.status(500).json({ error: "Erro ao criar produto" }); }
 });
 
+// !!!!! NOVA ROTA PARA ATUALIZAR UM PRODUTO !!!!!
+app.put('/api/produtos/:id', canEditProduct, async (req, res) => {
+    try {
+        const { nome, descricao, preco, categoria, imagem_url } = req.body;
+        const updatedProduct = await Produto.findByIdAndUpdate(
+            req.params.id,
+            { nome, descricao, preco, categoria, imagem_url },
+            { new: true, runValidators: true } // {new: true} retorna o documento atualizado
+        );
+        if (!updatedProduct) {
+            return res.status(404).json({ error: 'Produto não encontrado para atualização.' });
+        }
+        res.status(200).json({ message: 'Produto atualizado com sucesso!', produto: updatedProduct });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao atualizar o produto.' });
+    }
+});
+
+
 app.delete('/api/produtos/:id', canDeleteProduct, async (req, res) => {
     try {
         const result = await Produto.findByIdAndDelete(req.params.id);
@@ -185,12 +226,9 @@ app.delete('/api/produtos/:id', canDeleteProduct, async (req, res) => {
     } catch (error) { res.status(500).json({ error: "Erro ao deletar produto" }); }
 });
 
-
-// ROTA CATCH-ALL (Pega tudo que NÃO é um arquivo na pasta public e NÃO é uma API)
-// Esta rota DEVE VIR POR ÚLTIMO.
+// ROTA CATCH-ALL
 app.get(/^\/(?!api).*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
 
 app.listen(PORT, () => { console.log(`Servidor rodando na porta ${PORT}`); });
